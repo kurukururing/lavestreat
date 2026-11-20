@@ -1,11 +1,261 @@
-// Model ditulis di W1-18 dari docs/DATABASE.md.
-// Terblokir B-06 (Q-07: panjang orders.code) dan B-07 (Q-13: est_days_hint) sebelum migrasi pertama.
+// Sumber: docs/DATABASE.md Bagian 2–5 (PRD Bagian 12). Ubah dokumen dulu, baru skema.
+// Field memakai snake_case persis nama kolom supaya tidak perlu @map; model memakai @@map.
+// Semua timestamp Timestamptz(3): presisi ms sama antara nilai yang dibaca klien dan
+// kondisi updateMany pada kontrol konkurensi (AC-02.10).
 
 generator client {
-  provider = "prisma-client"
-  output   = "../src/generated/prisma"
+  provider            = "prisma-client"
+  output              = "../src/generated/prisma"
+  moduleFormat        = "esm"
+  // Node >= 22.18 menjalankan .ts lewat type stripping, sehingga klien bisa diimpor dari JS.
+  importFileExtension = "ts"
 }
 
 datasource db {
   provider = "postgresql"
+}
+
+// ---------- enum (DATABASE.md Bagian 2) ----------
+
+enum CatalogItemType {
+  service
+  addon
+  product
+
+  @@map("catalog_item_type")
+}
+
+enum OrderSource {
+  public
+  admin_manual
+  admin_ai_chat
+
+  @@map("order_source")
+}
+
+enum OrderType {
+  treatment
+  product_only
+
+  @@map("order_type")
+}
+
+/// `done` = "Selesai", `completed` = "Diambil/Diantar" (BR-08). Jangan tertukar.
+enum OrderStatus {
+  pending_confirmation
+  received
+  processing
+  done
+  completed
+  cancelled
+
+  @@map("order_status")
+}
+
+enum Fulfillment {
+  pickup
+  dropoff
+
+  @@map("fulfillment")
+}
+
+enum ServiceArea {
+  sidoarjo
+  surabaya
+
+  @@map("service_area")
+}
+
+enum ScheduledSlot {
+  morning
+  noon
+  evening
+
+  @@map("scheduled_slot")
+}
+
+enum EstimateSource {
+  ai
+  manual
+  baseline
+
+  @@map("estimate_source")
+}
+
+enum PhotoKind {
+  before_customer
+  before
+  after
+
+  @@map("photo_kind")
+}
+
+enum PhotoUploader {
+  customer
+  admin
+
+  @@map("photo_uploader")
+}
+
+// ---------- tabel (DATABASE.md Bagian 4) ----------
+
+model CatalogItem {
+  code          String          @id
+  type          CatalogItemType
+  name          String
+  description   String?
+  price_idr     Int
+  unit          String
+  est_days_hint Int?
+  active        Boolean         @default(true)
+  created_at    DateTime        @default(now()) @db.Timestamptz(3)
+  updated_at    DateTime        @updatedAt @db.Timestamptz(3)
+
+  order_items OrderItem[]
+
+  @@map("catalog_items")
+}
+
+model Customer {
+  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name       String
+  phone_e164 String   @unique
+  email      String?
+  created_at DateTime @default(now()) @db.Timestamptz(3)
+  updated_at DateTime @updatedAt @db.Timestamptz(3)
+
+  orders Order[]
+
+  @@map("customers")
+}
+
+model Order {
+  id                     String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  code                   String          @unique @db.Char(11)
+  customer_id            String          @db.Uuid
+  source                 OrderSource
+  order_type             OrderType
+  status                 OrderStatus
+  customer_name_snapshot String
+  fulfillment            Fulfillment
+  area                   ServiceArea?
+  scheduled_date         DateTime        @db.Date
+  scheduled_slot         ScheduledSlot
+  address_text           String?
+  lat                    Decimal?        @db.Decimal(9, 6)
+  lng                    Decimal?        @db.Decimal(9, 6)
+  customer_notes         String?
+  internal_notes         String?
+  subtotal_idr           Int
+  shipping_idr           Int
+  total_idr              Int
+  estimated_days         Int?
+  ai_estimate_days       Int?
+  estimate_source        EstimateSource?
+  received_at            DateTime?       @db.Timestamptz(3)
+  done_at                DateTime?       @db.Timestamptz(3)
+  completed_at           DateTime?       @db.Timestamptz(3)
+  cancelled_at           DateTime?       @db.Timestamptz(3)
+  cancel_reason          String?
+  idempotency_key        String?         @unique
+  client_ip_hash         String?
+  created_at             DateTime        @default(now()) @db.Timestamptz(3)
+  updated_at             DateTime        @updatedAt @db.Timestamptz(3)
+
+  customer           Customer             @relation(fields: [customer_id], references: [id], onDelete: Restrict)
+  items              OrderItem[]
+  photos             OrderPhoto[]
+  status_history     OrderStatusHistory[]
+  aftercare_messages AftercareMessage[]
+
+  @@index([status, created_at])
+  @@index([customer_id])
+  @@map("orders")
+}
+
+model OrderItem {
+  id                  String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  order_id            String          @db.Uuid
+  item_type           CatalogItemType
+  catalog_code        String
+  name_snapshot       String
+  unit_price_snapshot Int
+  qty                 Int
+  line_total          Int
+  created_at          DateTime        @default(now()) @db.Timestamptz(3)
+
+  order   Order       @relation(fields: [order_id], references: [id], onDelete: Cascade)
+  catalog CatalogItem @relation(fields: [catalog_code], references: [code], onDelete: Restrict)
+
+  @@index([order_id])
+  @@map("order_items")
+}
+
+/// Metadata foto saja. Isi berkas di photo_blobs: jangan di-include saat mengambil daftar foto.
+model OrderPhoto {
+  id          String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  order_id    String        @db.Uuid
+  kind        PhotoKind
+  storage_key String
+  mime        String
+  size_bytes  Int
+  uploaded_by PhotoUploader
+  created_at  DateTime      @default(now()) @db.Timestamptz(3)
+
+  order Order      @relation(fields: [order_id], references: [id], onDelete: Cascade)
+  blob  PhotoBlob?
+
+  @@index([order_id])
+  @@map("order_photos")
+}
+
+model PhotoBlob {
+  photo_id   String   @id @db.Uuid
+  data       Bytes
+  created_at DateTime @default(now()) @db.Timestamptz(3)
+
+  photo OrderPhoto @relation(fields: [photo_id], references: [id], onDelete: Cascade)
+
+  @@map("photo_blobs")
+}
+
+model OrderStatusHistory {
+  id          String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  order_id    String       @db.Uuid
+  from_status OrderStatus?
+  to_status   OrderStatus
+  changed_at  DateTime     @default(now()) @db.Timestamptz(3)
+  note        String?
+  created_at  DateTime     @default(now()) @db.Timestamptz(3)
+
+  order Order @relation(fields: [order_id], references: [id], onDelete: Cascade)
+
+  @@index([order_id])
+  @@map("order_status_history")
+}
+
+model AftercareMessage {
+  id         String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  order_id   String    @db.Uuid
+  content    String
+  model_name String
+  copied_at  DateTime? @db.Timestamptz(3)
+  created_at DateTime  @default(now()) @db.Timestamptz(3)
+  updated_at DateTime  @updatedAt @db.Timestamptz(3)
+
+  order Order @relation(fields: [order_id], references: [id], onDelete: Cascade)
+
+  @@index([order_id])
+  @@map("aftercare_messages")
+}
+
+model AdminUser {
+  id            String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  username      String    @unique
+  password_hash String
+  last_login_at DateTime? @db.Timestamptz(3)
+  created_at    DateTime  @default(now()) @db.Timestamptz(3)
+  updated_at    DateTime  @updatedAt @db.Timestamptz(3)
+
+  @@map("admin_users")
 }

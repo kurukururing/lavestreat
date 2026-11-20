@@ -25,6 +25,14 @@ uvicorn app.main:app --reload
 
 Perintah lain (lint, tes, migrasi, seed, skrip admin) ada di `AGENTS.md` Bagian 8.
 
+### Front-end tanpa back-end (mock API)
+
+```bash
+npm run dev -w frontend -- --mode mock
+```
+
+Semua panggilan `/api` dijawab MSW dari `frontend/src/mocks/` (data dummy, hilang saat halaman dimuat ulang). Login admin mock: `owner` / `dummy-owner`. Belum dimock: unduh foto dan nota (PUB-04, PUB-05, ADM-14, ADM-15) serta fitur P1 (ADM-16 s.d. ADM-18). Tes front-end memakai handler yang sama.
+
 ## Produksi (Render)
 
 - Service 1 (Express + front-end). Build: `npm ci --include=dev && npm run build -w frontend && npm run db:generate -w backend`. Start: `npm run db:deploy -w backend && node backend/src/server.js`.

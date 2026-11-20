@@ -11,6 +11,7 @@ export default [
       '**/dist',
       '**/coverage',
       'backend/src/generated',
+      'frontend/public/mockServiceWorker.js',
       'ai-service',
       'data-science',
     ],
@@ -18,7 +19,7 @@ export default [
   js.configs.recommended,
   {
     languageOptions: { ecmaVersion: 'latest', sourceType: 'module', globals: globals.node },
-    rules: { 'no-unused-vars': ['error', { argsIgnorePattern: '^_' }] },
+    rules: { 'no-unused-vars': ['error', { argsIgnorePattern: '^_', ignoreRestSiblings: true }] },
   },
   {
     files: ['frontend/**/*.{js,jsx}'],

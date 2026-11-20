@@ -6,6 +6,7 @@ import { defineConfig } from 'prisma/config';
 // Aplikasi memakai DATABASE_URL (pooled) lewat @prisma/adapter-pg.
 export default defineConfig({
   schema: 'prisma/schema.prisma',
-  migrations: { path: 'prisma/migrations' },
+  // `seed` juga dipanggil otomatis oleh `prisma migrate reset`.
+  migrations: { path: 'prisma/migrations', seed: 'node prisma/seed.js' },
   datasource: { url: process.env.DIRECT_URL ?? '' },
 });

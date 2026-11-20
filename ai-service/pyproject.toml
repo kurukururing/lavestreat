@@ -1,0 +1,11 @@
+[tool.ruff]
+target-version = "py313"
+line-length = 100
+extend-exclude = ["../data-science/notebooks"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]

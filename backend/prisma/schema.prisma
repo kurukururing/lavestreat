@@ -1,0 +1,11 @@
+// Model ditulis di W1-18 dari docs/DATABASE.md.
+// Terblokir B-06 (Q-07: panjang orders.code) dan B-07 (Q-13: est_days_hint) sebelum migrasi pertama.
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}

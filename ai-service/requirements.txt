@@ -1,0 +1,4 @@
+# Ditambah per tugas: scikit-learn, pandas, joblib (W2 FR-04), google-genai (FR-06/FR-07).
+fastapi==0.165.0
+uvicorn[standard]==0.54.0
+pydantic==2.14.4

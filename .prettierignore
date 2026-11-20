@@ -1,0 +1,12 @@
+node_modules
+dist
+coverage
+package-lock.json
+backend/src/generated
+backend/prisma/migrations
+docs
+*.md
+ai-service
+data-science
+# Disalin persis dari docs/DESIGN.md Bagian 11
+frontend/src/index.css

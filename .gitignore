@@ -1,0 +1,35 @@
+# Markdown tidak di-push kecuali README (permintaan pemilik repo)
+*.md
+!README.md
+
+node_modules/
+dist/
+*.log
+coverage/
+.env
+.env.*
+!.env.example
+
+# Prisma client hasil generate
+backend/src/generated/
+
+# Playwright
+test-results/
+playwright-report/
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+.pytest_cache/
+.ruff_cache/
+.ipynb_checkpoints/
+
+# Pengaturan lokal Claude Code (bisa memuat izin/jalur pribadi)
+.claude/settings.local.json
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

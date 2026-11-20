@@ -16,6 +16,7 @@
     "data:purge": "node scripts/purge-dummy-data.js"
   },
   "dependencies": {
+    "@lavestreat/shared": "^0.0.0",
     "@prisma/adapter-pg": "^7.10.1",
     "@prisma/client": "^7.10.1",
     "dotenv": "^18.0.10",

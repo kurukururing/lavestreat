@@ -293,6 +293,19 @@ async function readBody(request) {
 const FORWARD = { received: 'processing', processing: 'done', done: 'completed' };
 const BACKWARD = { processing: 'received', done: 'processing' };
 const CANCELLABLE = ['pending_confirmation', 'received', 'processing', 'done'];
+/** Field body ADM-07 (API.md). `status`, total, `code`, dan timestamp tidak boleh dikirim. */
+const PATCHABLE = [
+  'customer_notes',
+  'internal_notes',
+  'scheduled_date',
+  'scheduled_slot',
+  'fulfillment',
+  'area',
+  'address_text',
+  'items',
+  'estimated_days',
+  'estimate_source',
+];
 
 function moveStatus(order, to, note) {
   const at = now();
@@ -503,7 +516,7 @@ const adminHandlers = [
     if (body.updated_at !== order.updated_at) return conflict();
     const { updated_at: _ignored, ...changes } = body;
     const allowed = ['pending_confirmation', 'received'].includes(order.status)
-      ? Object.keys(changes)
+      ? PATCHABLE
       : ['processing', 'done'].includes(order.status)
         ? ['internal_notes']
         : [];

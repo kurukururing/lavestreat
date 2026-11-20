@@ -127,6 +127,17 @@ describe('mock API admin', () => {
     expect((await res.json()).error.code).toBe('INVALID_TRANSITION');
   });
 
+  test('PATCH menolak field di luar ADM-07 seperti status', async () => {
+    await login();
+    const { data } = await (await api('/admin/orders?status=pending_confirmation')).json();
+    const res = await api(`/admin/orders/${data[0].id}`, {
+      method: 'PATCH',
+      body: { status: 'completed', updated_at: data[0].updated_at },
+    });
+    expect(res.status).toBe(422);
+    expect((await res.json()).error.details[0].field).toBe('status');
+  });
+
   test('pencarian nomor ternormalisasi menemukan pesanan yang sama', async () => {
     await login();
     const byLocal = await (await api('/admin/orders?q=0812000000')).json();

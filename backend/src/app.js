@@ -15,7 +15,9 @@ export function createApp({ distDir, trustProxyHops }) {
   app.disable('x-powered-by');
   // Bawaan helmet: CORP same-origin dan CSP 'self', cocok untuk hasil build Vite (satu origin).
   app.use(helmet());
-  app.use(express.json({ limit: '16mb' }));
+  // Batas bawaan 100 kb cukup untuk JSON. Batas 16 MB (D-02) untuk foto dipasang di parser
+  // multipart rute foto saja, supaya endpoint publik tidak mengurai JSON raksasa.
+  app.use(express.json());
 
   // Rute /api/* didaftarkan di sini oleh modul fitur.
 

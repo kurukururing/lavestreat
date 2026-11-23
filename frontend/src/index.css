@@ -226,6 +226,10 @@
   * {
     @apply border-border;
   }
+  /* Navbar portal lengket (tinggi 64/72 px): lompatan jangkar tidak tertutup header. */
+  html {
+    scroll-padding-top: 5rem;
+  }
   body {
     @apply bg-background text-foreground font-sans antialiased;
     font-variant-numeric: tabular-nums;

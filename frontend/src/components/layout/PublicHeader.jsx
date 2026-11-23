@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   BadgeCheck,
   ChevronRight,
@@ -29,9 +29,20 @@ export function PublicHeader() {
   const { pathname } = useLocation();
   const isActive = (to) => (to === '/' ? pathname === '/' : pathname.startsWith(to));
   const [open, setOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 8);
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
 
   return (
-    <header className="border-b border-border bg-card">
+    <header
+      data-scrolled={scrolled}
+      className="sticky top-0 z-40 border-b border-border bg-card transition-shadow duration-200 data-[scrolled=true]:shadow-sm"
+    >
       <div className="mx-auto flex h-16 w-full max-w-312 items-center justify-between pr-2 pl-4 lg:h-18 lg:px-6">
         <Link
           to="/"

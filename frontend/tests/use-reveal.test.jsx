@@ -14,6 +14,18 @@ function Harness() {
   );
 }
 
+function TestWithButton() {
+  const ref = useRef(null);
+  useReveal(ref);
+  return (
+    <div ref={ref}>
+      <article data-reveal>
+        <button type="button">Pesan</button>
+      </article>
+    </div>
+  );
+}
+
 /** IO palsu: menyimpan callback dan elemen yang diamati agar tes bisa memicu perpotongan. */
 function installIO() {
   const io = { observe: vi.fn(), unobserve: vi.fn(), disconnect: vi.fn(), callback: null };
@@ -65,6 +77,25 @@ describe('useReveal', () => {
     io.callback([{ isIntersecting: true, target: p }]);
     expect(p).toHaveAttribute('data-revealed');
     expect(io.unobserve).toHaveBeenCalledWith(p);
+  });
+
+  test('elemen yang sudah di layar saat mulai langsung tampil tanpa berkedip', () => {
+    installIO();
+    const spy = vi
+      .spyOn(HTMLElement.prototype, 'getBoundingClientRect')
+      .mockReturnValue({ top: 100, bottom: 200, left: 0, right: 100, width: 100, height: 100 });
+    render(<Harness />);
+    spy.mockRestore();
+    expect(screen.getByText('Satu')).toHaveAttribute('data-revealed');
+  });
+
+  test('fokus keyboard ke dalam elemen tersembunyi langsung menampilkannya', () => {
+    installIO();
+    render(<TestWithButton />);
+    const button = screen.getByRole('button', { name: 'Pesan' });
+    expect(button.closest('[data-reveal]')).not.toHaveAttribute('data-revealed');
+    button.focus();
+    expect(button.closest('[data-reveal]')).toHaveAttribute('data-revealed');
   });
 
   test('elemen yang ditambahkan belakangan ikut diamati', async () => {

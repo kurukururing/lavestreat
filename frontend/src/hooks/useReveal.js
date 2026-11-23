@@ -32,15 +32,27 @@ export function useReveal(ref) {
         { threshold: 0.15 },
       );
     }
-    const handle = (el) => (io ? io.observe(el) : show(el));
+    // Elemen yang sudah di layar langsung tampil; tanpa ini konten awal beranda berkedip hilang lalu muncul.
+    const inView = (el) => {
+      const r = el.getBoundingClientRect();
+      return r.bottom > 0 && r.top < window.innerHeight;
+    };
+    const handle = (el) => (io && !inView(el) ? io.observe(el) : show(el));
     const scan = () => root.querySelectorAll(SELECTOR).forEach(handle);
+    // Fokus keyboard (Tab) ke kartu yang belum tampil tidak boleh mendarat di elemen tak terlihat.
+    const onFocus = (e) => {
+      const el = e.target.closest?.('[data-reveal]');
+      if (el) show(el);
+    };
 
     scan();
     const mo = new MutationObserver(scan);
     mo.observe(root, { childList: true, subtree: true });
+    root.addEventListener('focusin', onFocus);
 
     return () => {
       mo.disconnect();
+      root.removeEventListener('focusin', onFocus);
       io?.disconnect();
       delete document.documentElement.dataset.revealReady;
     };

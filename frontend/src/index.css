@@ -284,6 +284,14 @@ html[data-reveal-ready] [data-reveal]:not([data-revealed]) {
   --reveal-i: 3;
 }
 
+/* Cetak (Ctrl+P) tidak menggulir, jadi konten yang belum muncul akan kosong di kertas. */
+@media print {
+  [data-reveal] {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}
+
 @keyframes page-in {
   from {
     opacity: 0;

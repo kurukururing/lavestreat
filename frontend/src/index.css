@@ -1,90 +1,114 @@
-/* Token dari docs/DESIGN.md Bagian 11. Ubah di DESIGN.md dulu, lalu salin ke sini. */
-@import "tailwindcss";
-@import "tw-animate-css";
-@import "@fontsource-variable/inter";
+/* Token dari docs/DESIGN.md Bagian 11 (v1.2, sinkron dengan variable Figma "Hi-fi"). Ubah di DESIGN.md dulu, lalu salin ke sini. */
+@import 'tailwindcss';
+@import 'tw-animate-css';
+@import '@fontsource-variable/inter';
+@import '@fontsource/poppins/600.css';
+@import '@fontsource/poppins/700.css';
+@import '@fontsource/poppins/800.css';
 
 /* Kelas .dark perlu varian kustom di Tailwind v4 (bawaan v4 memakai prefers-color-scheme) */
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  --background: #F5F8F9;
-  --foreground: #0F172A;
-  --card: #FFFFFF;
-  --card-foreground: #0F172A;
-  --popover: #FFFFFF;
-  --popover-foreground: #0F172A;
-  --primary: #0369A1;            /* brand-700, putih di atasnya 5,93 */
-  --primary-foreground: #FFFFFF;
-  --secondary: #F1F3F5;
-  --secondary-foreground: #0F172A;
-  --muted: #F1F3F5;
-  --muted-foreground: #5B6B80;
-  --accent: #E0F2FE;
-  --accent-foreground: #075985;
-  --destructive: #B91C1C;
-  --destructive-foreground: #FFFFFF;
-  --border: #E7E9ED;
-  --input: #CBD5E1;
-  --ring: #38BDF8;
-  --success: #15803D;
-  --success-bg: #DCFCE7;
-  --danger: #B91C1C;
-  --danger-bg: #FEE2E2;
-  --warning: #92400E;
-  --warning-bg: #FEF3C7;
-  --radius: 0.625rem;
-  --sidebar: #FFFFFF;
-  --sidebar-foreground: #0F172A;
-  --sidebar-primary: #0369A1;
-  --sidebar-primary-foreground: #FFFFFF;
-  --sidebar-accent: #E0F2FE;
-  --sidebar-accent-foreground: #075985;
-  --sidebar-border: #E7E9ED;
-  --chart-1: #0369A1;
-  --chart-2: #C2410C;
-  --chart-3: #6D28D9;
-  --chart-4: #15803D;
-  --chart-5: #B45309;
+  --background: #eef4fe;
+  --foreground: #0f172a;
+  --card: #ffffff;
+  --card-foreground: #0f172a;
+  --popover: #ffffff;
+  --popover-foreground: #0f172a;
+  --primary: #2f6fed; /* putih di atasnya 4,55 */
+  --primary-hover: #2458c4;
+  --primary-foreground: #ffffff;
+  --secondary: #eef4fe;
+  --secondary-foreground: #0f172a;
+  --muted: #eef4fe;
+  --muted-foreground: #475569; /* 6,96 di kanvas */
+  --accent: #dce7fd;
+  --accent-foreground: #2458c4; /* 5,14 di accent, teks/tautan biru */
+  --destructive: #b91c1c;
+  --destructive-foreground: #ffffff;
+  --border: #bed3fb;
+  --input: #cbd5e1;
+  --ring: #6393f2;
+  --success: #15803d;
+  --success-bg: #dcfce7;
+  --danger: #b91c1c;
+  --danger-bg: #fee2e2;
+  --warning: #92400e;
+  --warning-bg: #fef3c7;
+  --radius: 0.75rem;
+  /* Sidebar admin navy (permukaan inverse) */
+  --sidebar: #0a3d66;
+  --sidebar-foreground: #ffffff;
+  --sidebar-muted-foreground: rgb(255 255 255 / 0.72); /* 6,2 di navy */
+  --sidebar-primary: #2f6fed;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: rgb(255 255 255 / 0.08);
+  --sidebar-border: rgb(255 255 255 / 0.14);
+  /* Permukaan gelap portal pembeli (footer, label "Sebelum"): navy yang sama dengan sidebar */
+  --inverse: #0a3d66;
+  --inverse-foreground: #ffffff;
+  --inverse-muted-foreground: rgb(255 255 255 / 0.72);
+  --inverse-link: #92b5f7; /* 5,43 di navy */
+  /* Portal pembeli (Figma Hi-fi): latar "Bukti pengerjaan" dan pil "Paling lengkap" */
+  --sand: #f7f3eb;
+  --highlight: #fbbf24;
+  --chart-1: #2f6fed;
+  --chart-2: #c2410c;
+  --chart-3: #6d28d9;
+  --chart-4: #15803d;
+  --chart-5: #b45309;
+  --chart-6: #5b6b80;
+  /* Status pesanan BR-08 (DESIGN 2.3) */
+  --status-pending-bg: #fef3c7;
+  --status-pending-fg: #92400e;
+  --status-received-bg: #dce7fd;
+  --status-received-fg: #2458c4;
+  --status-processing-bg: #ede9fe;
+  --status-processing-fg: #5b21b6;
+  --status-done-bg: #dcfce7;
+  --status-done-fg: #15803d;
+  --status-completed-bg: #f1f5f9;
+  --status-completed-fg: #334155;
+  --status-cancelled-bg: #fee2e2;
+  --status-cancelled-fg: #b91c1c;
 }
 
-/* Opsional (D-11). Tidak diuji. */
+/* Opsional (D-11). Tidak diuji, belum disinkronkan dengan hi-fi. */
 .dark {
-  --background: #0A101C;
-  --foreground: #F1F5F9;
-  --card: #111A2B;
-  --card-foreground: #F1F5F9;
-  --popover: #111A2B;
-  --popover-foreground: #F1F5F9;
-  --primary: #38BDF8;
-  --primary-foreground: #082F49;
+  --background: #0a101c;
+  --foreground: #f1f5f9;
+  --card: #111a2b;
+  --card-foreground: #f1f5f9;
+  --popover: #111a2b;
+  --popover-foreground: #f1f5f9;
+  --primary: #38bdf8;
+  --primary-hover: #7dd3fc;
+  --primary-foreground: #082f49;
   --secondary: #162235;
-  --secondary-foreground: #F1F5F9;
+  --secondary-foreground: #f1f5f9;
   --muted: #162235;
-  --muted-foreground: #94A3B8;
-  --accent: #0C2A40;
-  --accent-foreground: #7DD3FC;
-  --destructive: #F87171;
-  --destructive-foreground: #3A1518;
-  --border: #1F2C42;
-  --input: #1F2C42;
-  --ring: #38BDF8;
-  --success: #4ADE80;
-  --success-bg: #0F2E1C;
-  --danger: #F87171;
-  --danger-bg: #3A1518;
-  --warning: #FBBF24;
-  --warning-bg: #3A2A08;
-  --sidebar: #0D1524;
-  --sidebar-foreground: #F1F5F9;
-  --sidebar-primary: #38BDF8;
-  --sidebar-primary-foreground: #082F49;
-  --sidebar-accent: #0C2A40;
-  --sidebar-accent-foreground: #7DD3FC;
-  --sidebar-border: #1F2C42;
+  --muted-foreground: #94a3b8;
+  --accent: #0c2a40;
+  --accent-foreground: #7dd3fc;
+  --destructive: #f87171;
+  --destructive-foreground: #3a1518;
+  --border: #1f2c42;
+  --input: #1f2c42;
+  --ring: #38bdf8;
+  --success: #4ade80;
+  --success-bg: #0f2e1c;
+  --danger: #f87171;
+  --danger-bg: #3a1518;
+  --warning: #fbbf24;
+  --warning-bg: #3a2a08;
+  --sidebar: #0d1524;
+  --sand: #162235;
 }
 
 @theme inline {
-  --font-sans: "Inter Variable", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: 'Inter Variable', ui-sans-serif, system-ui, sans-serif;
+  --font-heading: 'Poppins', 'Inter Variable', ui-sans-serif, system-ui, sans-serif;
 
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -93,6 +117,7 @@
   --color-popover: var(--popover);
   --color-popover-foreground: var(--popover-foreground);
   --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
   --color-primary-foreground: var(--primary-foreground);
   --color-secondary: var(--secondary);
   --color-secondary-foreground: var(--secondary-foreground);
@@ -113,46 +138,128 @@
   --color-warning-bg: var(--warning-bg);
   --color-sidebar: var(--sidebar);
   --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-muted-foreground: var(--sidebar-muted-foreground);
   --color-sidebar-primary: var(--sidebar-primary);
   --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
   --color-sidebar-accent: var(--sidebar-accent);
-  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
+  --color-inverse: var(--inverse);
+  --color-inverse-foreground: var(--inverse-foreground);
+  --color-inverse-muted-foreground: var(--inverse-muted-foreground);
+  --color-inverse-link: var(--inverse-link);
+  --color-sand: var(--sand);
+  --color-highlight: var(--highlight);
   --color-chart-1: var(--chart-1);
   --color-chart-2: var(--chart-2);
   --color-chart-3: var(--chart-3);
   --color-chart-4: var(--chart-4);
   --color-chart-5: var(--chart-5);
+  --color-chart-6: var(--chart-6);
+  --color-status-pending-bg: var(--status-pending-bg);
+  --color-status-pending-fg: var(--status-pending-fg);
+  --color-status-received-bg: var(--status-received-bg);
+  --color-status-received-fg: var(--status-received-fg);
+  --color-status-processing-bg: var(--status-processing-bg);
+  --color-status-processing-fg: var(--status-processing-fg);
+  --color-status-done-bg: var(--status-done-bg);
+  --color-status-done-fg: var(--status-done-fg);
+  --color-status-completed-bg: var(--status-completed-bg);
+  --color-status-completed-fg: var(--status-completed-fg);
+  --color-status-cancelled-bg: var(--status-cancelled-bg);
+  --color-status-cancelled-fg: var(--status-cancelled-fg);
 
-  --color-brand-50: #F0F9FF;
-  --color-brand-100: #E0F2FE;
-  --color-brand-200: #BAE6FD;
-  --color-brand-300: #7DD3FC;
-  --color-brand-400: #38BDF8;
-  --color-brand-500: #0EA5E9;
-  --color-brand-600: #0284C7;
-  --color-brand-700: #0369A1;
-  --color-brand-800: #075985;
-  --color-brand-900: #0C4A6E;
-  --color-brand-950: #082F49;
+  /* Skala merek dari variable Figma (hanya nilai yang ada di Figma) */
+  --color-brand-50: #dce7fd;
+  --color-brand-200: #bed3fb;
+  --color-brand-500: #4a82f0; /* dekoratif saja */
+  --color-brand-700: #2458c4;
+  --color-brand-800: #2458c4;
+  --color-brand-900: #0a3d66;
+
+  /* Tipografi (DESIGN 2.6). Body memakai text-base (16/24), text-sm (14/20), text-xs (12/16) bawaan */
+  --text-display: 2.25rem;
+  --text-display--line-height: 2.75rem;
+  --text-display--letter-spacing: -0.02em;
+  --text-display--font-weight: 800;
+  --text-display-lg: 3rem;
+  --text-display-lg--line-height: 3.5rem;
+  --text-display-lg--letter-spacing: -0.02em;
+  --text-display-lg--font-weight: 800;
+  --text-h1: 1.5rem;
+  --text-h1--line-height: 2rem;
+  --text-h1--letter-spacing: -0.01em;
+  --text-h1--font-weight: 700;
+  --text-h1-lg: 1.75rem;
+  --text-h1-lg--line-height: 2.25rem;
+  --text-h1-lg--letter-spacing: -0.01em;
+  --text-h1-lg--font-weight: 700;
+  --text-h2: 1.25rem;
+  --text-h2--line-height: 1.75rem;
+  --text-h2--letter-spacing: -0.005em;
+  --text-h2--font-weight: 700;
+  --text-h3: 1rem;
+  --text-h3--line-height: 1.5rem;
+  --text-h3--font-weight: 600;
+  --text-metric-xl: 2.5rem;
+  --text-metric-xl--line-height: 2.75rem;
+  --text-metric-xl--letter-spacing: -0.02em;
+  --text-metric-xl--font-weight: 600;
+  --text-metric-lg: 1.75rem;
+  --text-metric-lg--line-height: 2rem;
+  --text-metric-lg--letter-spacing: -0.02em;
+  --text-metric-lg--font-weight: 600;
 
   --radius-sm: 6px;
-  --radius-md: 10px;
-  --radius-lg: 16px;
+  --radius-md: 12px;
+  --radius-lg: 20px;
   --radius-xl: 24px;
 
-  --shadow-xs: 0 1px 2px rgba(15,23,42,.04);
-  --shadow-sm: 0 2px 8px rgba(15,23,42,.06);
-  --shadow-md: 0 8px 24px rgba(15,23,42,.10);
-  --shadow-lg: 0 20px 48px rgba(15,23,42,.16);
+  --shadow-xs: 0 1px 2px rgba(15, 23, 42, 0.04);
+  --shadow-sm: 0 2px 8px rgba(15, 23, 42, 0.06);
+  --shadow-md: 0 8px 24px rgba(15, 23, 42, 0.1);
+  --shadow-lg: 0 20px 48px rgba(15, 23, 42, 0.16);
+  --shadow-up: 0 -4px 16px rgba(15, 23, 42, 0.06);
+  --shadow-glow: 0 8px 24px rgba(47, 111, 237, 0.35);
 }
 
 @layer base {
-  * { @apply border-border; }
-  body { @apply bg-background text-foreground font-sans antialiased; font-variant-numeric: tabular-nums; }
-  input, select, textarea { font-size: 16px; }
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+    font-variant-numeric: tabular-nums;
+  }
+  h1,
+  h2,
+  h3 {
+    @apply font-heading;
+  }
+  input,
+  select,
+  textarea {
+    font-size: 16px;
+  }
+}
+
+/* Ring fokus Figma "Focus/Ring": putih 2 px lalu biru 4 px */
+@utility focus-ring {
+  outline: none;
+  box-shadow:
+    0 0 0 2px var(--card),
+    0 0 0 4px var(--ring);
+}
+
+/* Gradien navy di bawah teks putih pada foto (Figma "Foto utama", "Unggulan Deep Clean") */
+@utility photo-scrim {
+  background-image: linear-gradient(to bottom, rgb(7 43 74 / 0) 35%, rgb(7 43 74 / 0.88));
 }
 
 @media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
 }

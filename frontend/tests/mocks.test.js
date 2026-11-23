@@ -70,6 +70,13 @@ describe('mock API publik', () => {
     });
   });
 
+  test('order_type wajib sesuai kontrak PUB-02', async () => {
+    const { order_type: _omit, ...withoutType } = orderBody;
+    const res = await api('/public/orders', { method: 'POST', body: withoutType });
+    expect(res.status).toBe(422);
+    expect((await res.json()).error.details[0].field).toBe('order_type');
+  });
+
   test('format salah dan tidak ditemukan memberi pesan identik (AC-01.9)', async () => {
     const bad = await (await api('/public/orders/xx')).json();
     const missing = await (await api('/public/orders/LS-AAAAAAAA')).json();
@@ -115,6 +122,22 @@ describe('mock API admin', () => {
       body: { to_status: 'processing', updated_at: confirmed.updated_at },
     });
     expect((await moved.json()).status).toBe('processing');
+  });
+
+  test('pratinjau estimasi menerapkan batas D-04, nilai mentah tetap dikirim', async () => {
+    await login();
+    const estimate = (items) =>
+      api('/admin/orders/estimate', { method: 'POST', body: { items } }).then((r) => r.json());
+
+    const express = await estimate([{ catalog_code: 'EXPRESS', qty: 1 }]);
+    expect(express.suggested_days).toBe(1);
+    expect(express.ai_estimate_days).toBeGreaterThan(1);
+
+    const plus = await estimate([
+      { catalog_code: 'EXPRESS', qty: 1 },
+      { catalog_code: 'UNYELLOWING', qty: 1 },
+    ]);
+    expect(plus.suggested_days).toBe(3);
   });
 
   test('pending_confirmation tidak boleh ke received lewat /status', async () => {

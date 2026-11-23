@@ -36,3 +36,6 @@ export const CATALOG = [
     unit: 'per botol 100 ml',
   },
 ];
+
+/** Ongkir flat per pesanan (BR-03): jemput per area, antar sendiri gratis. Server tetap menghitung ulang. */
+export const SHIPPING = { sidoarjo: 5000, surabaya: 10000, dropoff: 0 };

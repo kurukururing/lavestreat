@@ -2,16 +2,12 @@
 
 import { CATALOG as BASE_CATALOG } from '@lavestreat/shared';
 
+export { SHIPPING } from '@lavestreat/shared';
+
 /** Katalog BR-01 dari shared/ (bentuk respons PUB-01). */
 export const CATALOG = BASE_CATALOG.map((item) => ({ ...item, description: null }));
 
-export const SHIPPING = { sidoarjo: 5000, surabaya: 10000, dropoff: 0 };
-
-export const SLOTS = [
-  { code: 'morning', label: 'PAGI', start: '09:00', end: '12:00' },
-  { code: 'noon', label: 'SIANG', start: '13:00', end: '16:00' },
-  { code: 'evening', label: 'SORE', start: '16:00', end: '19:00' },
-];
+export { SLOTS } from '@lavestreat/shared';
 
 export const MAX_ADVANCE_DAYS = 30;
 

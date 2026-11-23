@@ -55,7 +55,10 @@ function PriceRow({ code, name }) {
 
 function PhotoServiceCard({ code, name, src }) {
   return (
-    <article className="flex flex-col overflow-hidden rounded-lg border border-border bg-card">
+    <article
+      data-reveal
+      className="flex flex-col overflow-hidden rounded-lg border border-border bg-card hover:-translate-y-0.5 hover:shadow-md"
+    >
       <img src={src} alt="" loading="lazy" className="h-27.5 w-full object-cover lg:h-37.5" />
       <div className="flex flex-1 flex-col gap-0.5 p-3 lg:gap-1.5 lg:px-4.5 lg:py-4">
         <h3 className="font-sans text-sm font-medium text-brand-900 lg:font-heading lg:text-h3">
@@ -73,8 +76,9 @@ function PhotoServiceCard({ code, name, src }) {
 function IconServiceCard({ code, name, icon: Icon, className }) {
   return (
     <article
+      data-reveal
       className={cn(
-        'flex flex-col gap-2 rounded-lg border border-border bg-card p-3 lg:gap-2.5 lg:p-5',
+        'flex flex-col gap-2 rounded-lg border border-border bg-card p-3 lg:gap-2.5 lg:p-5 hover:-translate-y-0.5 hover:shadow-md',
         className,
       )}
     >
@@ -101,7 +105,10 @@ function IconServiceCard({ code, name, icon: Icon, className }) {
 function PriceList({ title, rows, className }) {
   const { price } = useCatalog();
   return (
-    <article className={cn('rounded-lg px-4 py-3 font-medium lg:px-5 lg:py-4', className)}>
+    <article
+      data-reveal
+      className={cn('rounded-lg px-4 py-3 font-medium lg:px-5 lg:py-4', className)}
+    >
       <h3 className="font-sans text-xs tracking-[0.06em] text-brand-700 uppercase">{title}</h3>
       <dl>
         {rows.map((r) => (
@@ -145,7 +152,10 @@ export function ServiceCatalog() {
 
         <CatalogError />
         <div className="grid grid-cols-2 gap-3 lg:grid-cols-4 lg:gap-4">
-          <article className="relative col-span-2 flex h-55 flex-col items-start justify-end gap-1.5 overflow-hidden rounded-lg p-4 lg:h-80 lg:p-6">
+          <article
+            data-reveal
+            className="relative col-span-2 flex h-55 flex-col items-start justify-end gap-1.5 overflow-hidden rounded-lg p-4 lg:h-80 lg:p-6"
+          >
             <img
               src={deepCleanSrc}
               alt=""

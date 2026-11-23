@@ -7,7 +7,7 @@ import { cn } from '@/lib/utils';
  */
 function SectionHeading({ eyebrow, title, description, id, className }) {
   return (
-    <div className={cn('flex flex-col gap-2', className)}>
+    <div data-reveal className={cn('flex flex-col gap-2', className)}>
       {eyebrow && (
         <p className="text-xs font-medium tracking-[0.06em] text-brand-700 uppercase">{eyebrow}</p>
       )}

@@ -87,7 +87,10 @@ export function ContactPage() {
       </InfoSection>
       <InfoSection id="lokasi-judul" eyebrow="Lokasi" title="Outlet dan area layanan">
         <CatalogError />
-        <ul className="grid gap-5 rounded-lg border border-border bg-card p-4 shadow-sm lg:grid-cols-2 lg:gap-x-12 lg:p-6">
+        <ul
+          data-reveal
+          className="grid gap-5 rounded-lg border border-border bg-card p-4 shadow-sm lg:grid-cols-2 lg:gap-x-12 lg:p-6"
+        >
           {LOCATION.map(({ icon: Icon, title, text }) => (
             <li key={title} className="flex gap-3.5">
               <span className="flex size-10 shrink-0 items-center justify-center rounded-md bg-accent text-primary">

@@ -37,7 +37,7 @@ export function HowItWorks() {
         {/* Ponsel: daftar bernomor. Web: tiga kartu dengan panah. */}
         <ol className="flex flex-col gap-4 lg:hidden">
           {STEPS.map((s, i) => (
-            <li key={s.title} className="flex gap-3.5">
+            <li key={s.title} data-reveal className="flex gap-3.5">
               <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-primary text-base font-medium text-primary-foreground">
                 {i + 1}
               </span>
@@ -52,7 +52,12 @@ export function HowItWorks() {
           {STEPS.map((s, i) => (
             <li key={s.title} className="contents">
               {i > 0 && <ArrowRight className="size-6 shrink-0 text-primary" aria-hidden="true" />}
-              <article className="flex min-w-0 flex-1 flex-col gap-3.5 self-stretch rounded-xl bg-background p-6">
+              <article
+                data-reveal
+                // li memakai display: contents, jadi urutan muncul tidak bisa dari :nth-child.
+                style={{ '--reveal-i': i }}
+                className="flex min-w-0 flex-1 flex-col gap-3.5 self-stretch rounded-xl bg-background p-6"
+              >
                 <div className="flex items-center justify-between">
                   <span className="font-heading text-display-lg text-accent" aria-hidden="true">
                     {String(i + 1).padStart(2, '0')}

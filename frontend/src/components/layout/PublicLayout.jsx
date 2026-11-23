@@ -1,9 +1,10 @@
-import { Suspense, useEffect } from 'react';
+import { Suspense, useEffect, useRef } from 'react';
 import { Link, Outlet, useLocation, useMatches } from 'react-router';
 
 import { PageLoader } from '@/app/PageLoader';
 import { PublicFooter } from '@/components/layout/PublicFooter';
 import { PublicHeader } from '@/components/layout/PublicHeader';
+import { useReveal } from '@/hooks/useReveal';
 import { cn } from '@/lib/utils';
 
 /** Lebar konten portal: 1200 px di tengah (Figma padding 120 di 1440), gutter 16 (ponsel) / 24 (≥ lg). */
@@ -22,6 +23,9 @@ function useScrollTop() {
 /** Kerangka portal pembeli: header, isi, footer (PG-1 sampai PG-10). */
 export function PublicLayout() {
   useScrollTop();
+  const { pathname } = useLocation();
+  const mainRef = useRef(null);
+  useReveal(mainRef);
   const handle = [...useMatches()].reverse().find((m) => m.handle)?.handle ?? {};
   useEffect(() => {
     document.title = handle.title ? `${handle.title} · LAVE STREAT` : 'LAVE STREAT';
@@ -37,10 +41,13 @@ export function PublicLayout() {
         Lewati ke konten
       </a>
       <PublicHeader />
-      <main id="konten" className="flex-1">
-        <Suspense fallback={<PageLoader />}>
-          <Outlet />
-        </Suspense>
+      <main id="konten" ref={mainRef} className="flex-1">
+        {/* key: isi baru memudar masuk setiap pindah halaman. */}
+        <div key={pathname} className="animate-page-in">
+          <Suspense fallback={<PageLoader />}>
+            <Outlet />
+          </Suspense>
+        </div>
       </main>
       <PublicFooter />
     </div>

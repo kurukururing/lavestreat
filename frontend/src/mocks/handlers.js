@@ -1,7 +1,9 @@
 // Mock API dari kontrak docs/API.md (W1-21) agar front-end bisa jalan sebelum back-end siap.
 // shortcut: validasi di sini hanya sebagian kecil aturan server (BR-02, AC-01.4 tidak lengkap);
 // ganti dengan skema Zod dari shared/ saat skema itu dibuat.
-// Tidak dimock (biner): PUB-04, PUB-05, ADM-14, ADM-15. Tidak dimock (P1): ADM-16 s.d. ADM-18.
+// Tidak dimock (biner): PUB-04, PUB-05. ADM-14 dan ADM-15 dimock sederhana (berkas unggahan
+// disimpan di memori, nota berupa PDF satu halaman). ADM-16 s.d. ADM-18 dimock dengan templat
+// dan pencocokan kata kunci, bukan model AI.
 import { http, HttpResponse } from 'msw/http';
 import {
   ORDER_CODE_ALPHABET,
@@ -26,12 +28,24 @@ const TRACK_NOT_FOUND = 'ID pesanan tidak ditemukan. Periksa kembali.';
 let db;
 let loggedIn;
 
+// Mode dev mock: sesi tetap ada saat halaman dimuat ulang (meniru cookie sesi). Hanya mock.
+const SESSION_FLAG = 'lavestreat-mock-session';
+function setSession(value) {
+  loggedIn = value;
+  try {
+    if (value) globalThis.sessionStorage?.setItem(SESSION_FLAG, '1');
+    else globalThis.sessionStorage?.removeItem(SESSION_FLAG);
+  } catch {
+    // penyimpanan diblokir: sesi hanya bertahan sampai muat ulang
+  }
+}
+
 /** Kembalikan data mock ke keadaan awal (dipakai antar tes). */
 export function resetMockDb() {
   const customers = seedCustomers();
-  db = { customers, orders: [], idempotency: new Map() };
+  db = { customers, orders: [], idempotency: new Map(), blobs: new Map() };
   for (const seed of SEED_ORDERS) db.orders.push(seedOrder(seed, customers));
-  loggedIn = false;
+  setSession(false);
 }
 
 // ---------- utilitas ----------
@@ -102,11 +116,17 @@ function priceItems(items) {
 const shippingFor = (fulfillment, area) => (fulfillment === 'pickup' ? (SHIPPING[area] ?? 0) : 0);
 
 /** Aturan sederhana pengganti layanan AI: batas atas D-04, rata-rata 3 hari. */
-function suggestDays(items) {
+/**
+ * Tiruan ADM-10/11: `ai_estimate_days` mentah (seolah dari model) dan `suggested_days` setelah
+ * batas atas AUDIT D-04 (EXPRESS ≤ 1, FASTTRACK ≤ 2, UNYELLOWING +2 pada batas), lalu 1–14.
+ */
+function aiEstimate(items) {
   const codes = items.map((i) => i.catalog_code);
-  let days = codes.includes('EXPRESS') ? 1 : codes.includes('FASTTRACK') ? 2 : 3;
-  if (codes.includes('UNYELLOWING')) days += 2;
-  return Math.min(Math.max(days, 1), 14);
+  const unyellowing = codes.includes('UNYELLOWING');
+  const raw = unyellowing ? 5 : 3;
+  let cap = codes.includes('EXPRESS') ? 1 : codes.includes('FASTTRACK') ? 2 : 14;
+  if (unyellowing && cap < 14) cap += 2;
+  return { ai_estimate_days: raw, suggested_days: Math.min(Math.max(Math.min(raw, cap), 1), 14) };
 }
 
 function withTotals(order) {
@@ -140,6 +160,20 @@ function seedOrder(seed, customers) {
   order.estimated_days = seed.estimated_days ?? null;
   order.ai_estimate_days = seed.estimated_days ?? null;
   order.estimate_source = seed.estimated_days ? 'ai' : null;
+  // Riwayat mengikuti jalur status sampai status seed agar linimasa detail terisi.
+  const path = isCancelled
+    ? ['cancelled']
+    : ORDER_STATUSES.slice(1, ORDER_STATUSES.indexOf(seed.status) + 1);
+  let from = 'pending_confirmation';
+  for (const to of path) {
+    order.status_history.push({
+      from_status: from,
+      to_status: to,
+      changed_at: createdAt,
+      note: null,
+    });
+    from = to;
+  }
   if (!isCancelled && reached('received')) order.received_at = createdAt;
   if (!isCancelled && reached('done')) order.done_at = createdAt;
   if (!isCancelled && reached('completed')) order.completed_at = createdAt;
@@ -249,6 +283,10 @@ function upsertCustomer({ name, phone, email }) {
 
 /** Validasi bersama PUB-02 dan ADM-05. Mengembalikan galat atau data pesanan baru. */
 function prepareOrder(body) {
+  // `product_only` hanya untuk FR-09 (P2), jadi belum diterima.
+  if (body.order_type !== 'treatment') {
+    return { error: validation('order_type', 'Jenis pesanan tidak valid.') };
+  }
   const priced = priceItems(body.items);
   if (priced.error) return priced;
   if (!['pickup', 'dropoff'].includes(body.fulfillment)) {
@@ -322,6 +360,100 @@ function moveStatus(order, to, note) {
   if (to === 'cancelled') order.cancelled_at = at;
   order.status = to;
   order.updated_at = at;
+}
+
+// ---------- berkas, nota, dan AI tiruan ----------
+
+function storeBlob(file) {
+  const id = uuid();
+  db.blobs.set(id, file);
+  return id;
+}
+
+/** PDF satu halaman berisi teks polos ASCII. Cukup untuk menguji alur unduh di mock. */
+function tinyPdf(lines) {
+  const safe = (t) => t.replace(/[^\x20-\x7e]/g, '').replace(/[()\\]/g, '');
+  const text = lines
+    .map((line, i) => `BT /F1 12 Tf 50 ${790 - i * 20} Td (${safe(line)}) Tj ET`)
+    .join('\n');
+  const objects = [
+    '<< /Type /Catalog /Pages 2 0 R >>',
+    '<< /Type /Pages /Kids [3 0 R] /Count 1 >>',
+    '<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Contents 4 0 R /Resources << /Font << /F1 5 0 R >> >> >>',
+    `<< /Length ${text.length} >>\nstream\n${text}\nendstream`,
+    '<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>',
+  ];
+  let pdf = '%PDF-1.4\n';
+  const offsets = objects.map((obj, i) => {
+    const at = pdf.length;
+    pdf += `${i + 1} 0 obj\n${obj}\nendobj\n`;
+    return at;
+  });
+  const xref = pdf.length;
+  pdf += `xref\n0 ${objects.length + 1}\n0000000000 65535 f \n`;
+  pdf += offsets.map((o) => `${String(o).padStart(10, '0')} 00000 n \n`).join('');
+  pdf += `trailer\n<< /Size ${objects.length + 1} /Root 1 0 R >>\nstartxref\n${xref}\n%%EOF`;
+  return pdf;
+}
+
+/** Draf after-care dari templat. Hanya nama depan dan nama layanan (AC-06.3). */
+function aftercareText(order, n) {
+  const first = order.customer_name_snapshot.split(' ')[0];
+  const services = order.items.filter((l) => l.item_type === 'service').map((l) => l.name);
+  const tips = [
+    'hindari menjemur di bawah terik dan simpan di tempat kering',
+    'bersihkan noda ringan dengan kain lembap sebelum mengering',
+    'pakai pelindung semprot agar warna tetap awet',
+  ];
+  const what = services.join(' dan ') || 'perawatan';
+  return `Halo ${first}, terima kasih sudah mencuci sepatu di LAVE STREAT! Setelah ${what}, ${tips[n % tips.length]}. Sampai jumpa lagi!`;
+}
+
+/** Ekstraksi chat tiruan FR-07: cocokkan nama layanan, jumlah, area, dan nama pemesan. */
+function parseChatText(text) {
+  const lower = text.toLowerCase();
+  const items = [];
+  for (const entry of CATALOG) {
+    const name = entry.name.toLowerCase().replace(/ (clean|treat|shoes)$/, '');
+    const at = lower.indexOf(name);
+    if (at < 0) continue;
+    const before = lower.slice(Math.max(0, at - 12), at);
+    const qty = Number(/(\d+)\s*(?:pasang|psg|x)?\s*$/.exec(before)?.[1] ?? 1);
+    items.push({ catalog_code: entry.code, qty: Math.min(Math.max(qty, 1), 10) });
+  }
+  const area = /sidoarjo/.test(lower) ? 'sidoarjo' : /surabaya/.test(lower) ? 'surabaya' : null;
+  const fulfillment = /jemput/.test(lower)
+    ? 'pickup'
+    : /antar sendiri|datang/.test(lower)
+      ? 'dropoff'
+      : null;
+  const name = /atas nama\s+([A-Za-z]+)/i.exec(text)?.[1] ?? null;
+  const phone = normalizePhone(/(\+?62|0)8[\d\s-]{7,14}/.exec(text)?.[0]);
+  const slot = /pagi/.test(lower)
+    ? 'morning'
+    : /siang/.test(lower)
+      ? 'noon'
+      : /sore/.test(lower)
+        ? 'evening'
+        : null;
+  const fields = {
+    customer: { name, phone },
+    items,
+    fulfillment,
+    area: fulfillment === 'pickup' ? area : null,
+    scheduled_date: null,
+    scheduled_slot: slot,
+    customer_notes: /noda[^.]*/i.exec(text)?.[0] ?? null,
+  };
+  const uncertain = [];
+  if (!name) uncertain.push('customer.name');
+  if (!phone) uncertain.push('customer.phone');
+  if (!items.length) uncertain.push('items');
+  if (!fulfillment) uncertain.push('fulfillment');
+  if (fulfillment === 'pickup' && !area) uncertain.push('area');
+  uncertain.push('scheduled_date');
+  if (!slot) uncertain.push('scheduled_slot');
+  return { fields, uncertain_fields: uncertain, confidence: {}, ambiguous: false };
 }
 
 // ---------- handler ----------
@@ -420,7 +552,7 @@ const authHandlers = [
     if (username !== MOCK_ADMIN.username || password !== MOCK_ADMIN.password) {
       return error(401, 'UNAUTHORIZED', 'Nama pengguna atau kata sandi salah.');
     }
-    loggedIn = true;
+    setSession(true);
     return HttpResponse.json({ username });
   }),
 ];
@@ -432,7 +564,7 @@ const requireSession = http.all('/api/admin/*', () => {
 
 const adminHandlers = [
   http.post('/api/admin/auth/logout', () => {
-    loggedIn = false;
+    setSession(false);
     return new HttpResponse(null, { status: 204 });
   }),
 
@@ -443,8 +575,7 @@ const adminHandlers = [
     const { items } = await request.json().catch(() => ({}));
     const priced = priceItems(items);
     if (priced.error) return priced.error;
-    const days = suggestDays(items);
-    return HttpResponse.json({ ai_estimate_days: days, suggested_days: days, model: 'mock' });
+    return HttpResponse.json({ ...aiEstimate(items), model: 'mock' });
   }),
 
   http.get('/api/admin/orders', ({ request }) => {
@@ -595,12 +726,11 @@ const adminHandlers = [
         'Estimasi hanya bisa dihitung sebelum pesanan diproses.',
       );
     }
-    const days = suggestDays(order.items);
-    order.ai_estimate_days = days;
+    const estimate = aiEstimate(order.items);
+    order.ai_estimate_days = estimate.ai_estimate_days;
     order.updated_at = now();
     return HttpResponse.json({
-      ai_estimate_days: days,
-      suggested_days: days,
+      ...estimate,
       model: 'mock',
       updated_at: order.updated_at,
     });
@@ -623,7 +753,7 @@ const adminHandlers = [
       ]);
     }
     const photos = files.map((file) => ({
-      id: uuid(),
+      id: storeBlob(file),
       kind,
       mime: 'image/jpeg',
       size_bytes: file.size,
@@ -642,7 +772,83 @@ const adminHandlers = [
       return validation('status', 'Pesanan sudah selesai diproses, foto tidak dapat diubah');
     }
     order.photos = order.photos.filter((p) => p !== photo);
+    db.blobs.delete(photo.id);
     return new HttpResponse(null, { status: 204 });
+  }),
+
+  http.get('/api/admin/orders/:id/photos/:photoId', ({ params }) => {
+    const order = findOrder(params.id);
+    const owned = order?.photos.some((p) => p.id === params.photoId);
+    const blob = owned && db.blobs.get(params.photoId);
+    if (!blob) return notFound();
+    return new HttpResponse(blob, { headers: { 'Content-Type': blob.type || 'image/jpeg' } });
+  }),
+
+  http.get('/api/admin/orders/:id/invoice', ({ params }) => {
+    const order = findOrder(params.id);
+    if (!order) return notFound();
+    const has = (kind) => order.photos.some((p) => p.kind === kind);
+    const warnings = [
+      !has('before') && 'missing_before_photo',
+      !has('after') && 'missing_after_photo',
+    ].filter(Boolean);
+    const lines = [
+      'LAVE STREAT - NOTA',
+      order.code,
+      `Kepada: ${order.customer_name_snapshot}`,
+      ...order.items.map((l) => `${l.name} x${l.qty}  Rp${l.line_total_idr}`),
+      `Ongkir Rp${order.shipping_idr}`,
+      `TOTAL Rp${order.total_idr}`,
+      'Pembayaran melalui QRIS di WhatsApp.',
+    ];
+    const headers = {
+      'Content-Type': 'application/pdf',
+      'Content-Disposition': `inline; filename="nota-${order.code}.pdf"`,
+    };
+    if (warnings.length) headers['X-Invoice-Warning'] = warnings.join(',');
+    return new HttpResponse(tinyPdf(lines), { headers });
+  }),
+
+  http.post('/api/admin/orders/:id/aftercare', ({ params }) => {
+    const order = findOrder(params.id);
+    if (!order) return notFound();
+    if (order.status !== 'done')
+      return validation('status', 'Draf hanya dapat dibuat saat status Selesai.');
+    if (order.aftercare_messages.length >= 5)
+      return validation('aftercare', 'Batas 5 draf tercapai.');
+    const draft = {
+      id: uuid(),
+      order_id: order.id,
+      content: aftercareText(order, order.aftercare_messages.length),
+      model_name: 'mock',
+      copied_at: null,
+      created_at: now(),
+    };
+    order.aftercare_messages.push(draft);
+    return HttpResponse.json(draft, { status: 201 });
+  }),
+
+  http.patch('/api/admin/aftercare/:draftId', async ({ params, request }) => {
+    const draft = db.orders
+      .flatMap((o) => o.aftercare_messages)
+      .find((d) => d.id === params.draftId);
+    if (!draft) return notFound();
+    const body = await request.json().catch(() => ({}));
+    if (body.copied !== true) return validation('copied', 'Nilai copied harus true.');
+    if (typeof body.content === 'string') {
+      if (!body.content.trim() || body.content.length > 1000)
+        return validation('content', 'Isi draf 1 sampai 1000 karakter.');
+      draft.content = body.content;
+    }
+    draft.copied_at = now();
+    return HttpResponse.json(draft);
+  }),
+
+  http.post('/api/admin/orders/parse-chat', async ({ request }) => {
+    const { text } = await request.json().catch(() => ({}));
+    if (typeof text !== 'string' || !text.trim() || text.length > 2000)
+      return validation('text', 'Teks chat 1 sampai 2000 karakter.');
+    return HttpResponse.json(parseChatText(text));
   }),
 
   http.get('/api/admin/customers', ({ request }) => {
@@ -712,6 +918,14 @@ function sampleDashboard(from, to) {
   };
 }
 
+const restored = (() => {
+  try {
+    return globalThis.sessionStorage?.getItem(SESSION_FLAG) === '1';
+  } catch {
+    return false;
+  }
+})();
 resetMockDb();
+setSession(restored);
 
 export const handlers = [...publicHandlers, ...authHandlers, requireSession, ...adminHandlers];

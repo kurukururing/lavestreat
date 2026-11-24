@@ -24,12 +24,12 @@ import {
 import { CatalogError, Money } from '@/features/public/Money';
 import { useCatalog } from '@/hooks/useCatalog';
 import { notifyOrdersChanged } from '@/hooks/usePendingCount';
-import { cn } from '@/lib/utils';
+import { cn, newId } from '@/lib/utils';
 
 const PHONE_RE = /^(\+?62|0)8\d{7,12}$/;
 // Nominal `undefined` (memuat) atau `null` (galat) ikut terbawa ke jumlah.
 const addMoney = (a, b) => (a == null ? a : b == null ? b : a + b);
-const newItem = () => ({ key: crypto.randomUUID(), catalog_code: '', qty: 1 });
+const newItem = () => ({ key: newId(), catalog_code: '', qty: 1 });
 
 const EMPTY_SCHEDULE = {
   fulfillment: null,

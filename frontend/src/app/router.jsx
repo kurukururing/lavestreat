@@ -1,14 +1,15 @@
-import { lazy } from 'react';
+import { lazy, Suspense } from 'react';
 import { createBrowserRouter, Outlet } from 'react-router';
 
-import { AdminShell } from '@/app/AdminShell';
+import { PageLoader } from '@/app/PageLoader';
 import { PublicLayout } from '@/components/layout/PublicLayout';
-import { AuthProvider } from '@/features/auth/AuthProvider';
 import { HomePage } from '@/pages/public/HomePage';
-import { HomePlaceholder } from '@/pages/public/HomePlaceholder';
 
 // Halaman dimuat terpisah agar Recharts dan form besar tidak ikut bundel awal (NFR-02).
 const page = (load, name) => lazy(() => load().then((m) => ({ default: m[name] })));
+// Kerangka admin juga dimuat terpisah: pembeli tidak perlu mengunduh sidebar dan sesi admin.
+const AuthProvider = page(() => import('@/features/auth/AuthProvider'), 'AuthProvider');
+const AdminShell = page(() => import('@/app/AdminShell'), 'AdminShell');
 const LoginPage = page(() => import('@/pages/admin/LoginPage'), 'LoginPage');
 const DashboardPage = page(() => import('@/pages/admin/DashboardPage'), 'DashboardPage');
 const OrderQueuePage = page(() => import('@/pages/admin/OrderQueuePage'), 'OrderQueuePage');
@@ -27,6 +28,9 @@ const GalleryPage = page(() => import('@/pages/public/GalleryPage'), 'GalleryPag
 const ContactPage = page(() => import('@/pages/public/ContactPage'), 'ContactPage');
 const OrderPage = page(() => import('@/pages/public/OrderPage'), 'OrderPage');
 const OrderDonePage = page(() => import('@/pages/public/OrderDonePage'), 'OrderDonePage');
+const TrackPage = page(() => import('@/pages/public/TrackPage'), 'TrackPage');
+const PrivacyPage = page(() => import('@/pages/public/PrivacyPage'), 'PrivacyPage');
+const NotFoundPage = page(() => import('@/pages/public/NotFoundPage'), 'NotFoundPage');
 // Galeri komponen portal pembeli, hanya saat dev (tidak ikut build produksi).
 const ComponentGallery = import.meta.env.DEV
   ? page(() => import('@/pages/dev/ComponentGallery'), 'ComponentGallery')
@@ -41,9 +45,11 @@ export const router = createBrowserRouter([
   {
     // Sesi admin (ADM-03) hanya diperiksa di rute admin, bukan setiap kunjungan pembeli.
     element: (
-      <AuthProvider>
-        <Outlet />
-      </AuthProvider>
+      <Suspense fallback={<PageLoader fullscreen />}>
+        <AuthProvider>
+          <Outlet />
+        </AuthProvider>
+      </Suspense>
     ),
     children: [
       { path: '/admin/login', element: <LoginPage /> },
@@ -118,8 +124,17 @@ export const router = createBrowserRouter([
         element: <OrderDonePage />,
         handle: { title: 'Pesanan terkirim', mobileHeader: 'minimal' },
       },
-      // Halaman PG-4 sampai PG-6 belum dibuat; sementara path lain ke halaman awal.
-      { path: '*', element: <HomePlaceholder /> },
+      {
+        path: 'lacak',
+        element: <TrackPage />,
+        handle: { title: 'Lacak pesanan', mobileHeader: 'order' },
+      },
+      {
+        path: 'privasi',
+        element: <PrivacyPage />,
+        handle: { title: 'Privasi', mobileHeader: 'back' },
+      },
+      { path: '*', element: <NotFoundPage />, handle: { title: 'Halaman tidak ditemukan' } },
     ],
   },
 ]);

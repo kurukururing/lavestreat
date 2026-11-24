@@ -46,7 +46,7 @@ export function PublicLayout() {
       >
         Lewati ke konten
       </a>
-      <PublicHeader mobile={handle.mobileHeader} />
+      <PublicHeader mobile={handle.mobileHeader} title={handle.title} />
       <main id="konten" ref={mainRef} className="flex-1">
         {/* key: isi baru memudar masuk setiap pindah halaman. */}
         <div key={pathname} className="animate-page-in">
@@ -77,7 +77,7 @@ export function PageHeader({ crumbs = [], title, description, className, childre
                   {c.to ? (
                     <Link
                       to={c.to}
-                      className="rounded-sm hover:text-foreground focus-visible:focus-ring"
+                      className="-my-3.5 inline-flex min-h-11 items-center rounded-sm hover:text-foreground focus-visible:focus-ring"
                     >
                       {c.label}
                     </Link>

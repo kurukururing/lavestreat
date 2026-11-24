@@ -5,12 +5,12 @@ import deepSrc from '@/assets/pesan/deep.jpg';
 import regulerSrc from '@/assets/pesan/reguler.jpg';
 import suedeSrc from '@/assets/pesan/suede.jpg';
 import whiteSrc from '@/assets/pesan/white.jpg';
-import { AREA_LABELS } from '@/features/order-form/order-form';
+import { AREA_LABELS, byCode } from '@/features/order-form/order-form';
 import { useCatalog } from '@/hooks/useCatalog';
 
 // Data dan perhitungan form pesanan publik (PG-2), dipisah dari komponen agar fast refresh jalan.
 
-export const byCode = Object.fromEntries(CATALOG.map((c) => [c.code, c]));
+export { byCode };
 
 // Keterangan item, disalin dari Figma Hi-fi (89:3771) dan kartu layanan (84:3942).
 export const DESC = {

@@ -12,6 +12,21 @@ export default defineConfig(({ mode }) => {
     server: {
       proxy: { '/api': env.VITE_DEV_API_TARGET || 'http://localhost:3000' },
     },
+    // Tanpa ini rolldown memecah modul bersama (tiap ikon lucide, util kecil) menjadi ±30 berkas
+    // yang harus diunduh sebelum render pertama. Modul yang dipakai ≥ 2 potongan digabung ke
+    // `vendor` dan `shared`; modul milik satu halaman saja (mis. Recharts di dasbor) tetap lazy.
+    build: {
+      rolldownOptions: {
+        output: {
+          codeSplitting: {
+            groups: [
+              { name: 'vendor', test: /node_modules/, minShareCount: 2 },
+              { name: 'shared', test: /[\\/]src[\\/]/, minShareCount: 2 },
+            ],
+          },
+        },
+      },
+    },
     test: {
       environment: 'jsdom',
       setupFiles: ['./tests/setup.js'],

@@ -21,7 +21,7 @@ import { AREAS, MAX_ADVANCE_DAYS, ORDERABLE, catalogName } from '@/features/orde
 import { Money } from '@/features/public/Money';
 import { useCatalog } from '@/hooks/useCatalog';
 import { addDays, todayJakarta } from '@/lib/format';
-import { cn } from '@/lib/utils';
+import { cn, newId } from '@/lib/utils';
 
 /** Penanda field hasil AI yang perlu diperiksa (FR-07, AC-07.3): border putus-putus + "Periksa". */
 export function CheckFlag({ show, children, hint }) {
@@ -113,9 +113,7 @@ export function ItemsEditor({ items, onChange, errors = {}, flagged = false }) {
           variant="link"
           className="w-fit"
           disabled={items.length >= ORDERABLE.length}
-          onClick={() =>
-            onChange([...items, { key: crypto.randomUUID(), catalog_code: '', qty: 1 }])
-          }
+          onClick={() => onChange([...items, { key: newId(), catalog_code: '', qty: 1 }])}
         >
           <Plus aria-hidden="true" />
           Tambah item

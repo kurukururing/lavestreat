@@ -21,7 +21,7 @@ export default defineConfig(({ mode }) => {
           codeSplitting: {
             groups: [
               { name: 'vendor', test: /node_modules/, minShareCount: 2 },
-              { name: 'shared', test: /[\/]src[\/]/, minShareCount: 2 },
+              { name: 'shared', test: /[\\/]src[\\/]/, minShareCount: 2 },
             ],
           },
         },

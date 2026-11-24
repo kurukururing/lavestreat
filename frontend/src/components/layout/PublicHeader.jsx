@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import {
+  ArrowLeft,
   BadgeCheck,
   ChevronRight,
   ClipboardList,
@@ -10,7 +11,7 @@ import {
   Truck,
   X,
 } from 'lucide-react';
-import { Link, useLocation } from 'react-router';
+import { Link, useLocation, useNavigate } from 'react-router';
 
 import { Button, buttonVariants } from '@/components/ui/button';
 import { Logo } from '@/components/ui/logo';
@@ -25,11 +26,15 @@ const MENU_ICONS = [Sparkles, ClipboardList, Truck, BadgeCheck, Phone];
  * Header portal pembeli (Figma 89:3778 web, 86:3775 ponsel). ≥ lg: navigasi pil di tengah,
  * "Lacak" dan "Pesan Sekarang" di kanan. < lg: tombol ikon lacak dan menu layar penuh.
  * `mobile`: 'none' menyembunyikan header di ponsel (halaman punya header sendiri, mis. form
- * pesanan 76:2494); 'minimal' hanya logo + tombol "Lacak" (konfirmasi pesanan 78:3344).
- * @param {{ mobile?: 'default' | 'none' | 'minimal' }} props
+ * pesanan 76:2494); 'minimal' hanya logo + tombol "Lacak" (konfirmasi pesanan 78:3344);
+ * 'order' logo + "Pesan Sekarang" (lacak 79:3275); 'back' panah kembali + `title` (privasi 81:3715).
+ * @param {{ mobile?: 'default' | 'none' | 'minimal' | 'order' | 'back', title?: string }} props
  */
-export function PublicHeader({ mobile = 'default' }) {
+export function PublicHeader({ mobile = 'default', title }) {
   const { pathname } = useLocation();
+  const navigate = useNavigate();
+  // Dibuka langsung (tanpa riwayat di aplikasi): panah kembali menuju beranda.
+  const back = () => (window.history.state?.idx > 0 ? navigate(-1) : navigate('/'));
   const isActive = (to) => (to === '/' ? pathname === '/' : pathname.startsWith(to));
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
@@ -50,10 +55,27 @@ export function PublicHeader({ mobile = 'default' }) {
       )}
     >
       <div className="mx-auto flex h-16 w-full max-w-312 items-center justify-between pr-2 pl-4 lg:h-18 lg:px-6">
+        {mobile === 'back' && (
+          <div className="flex min-w-0 items-center gap-1 lg:hidden">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={back}
+              aria-label="Kembali"
+              className="-ml-3"
+            >
+              <ArrowLeft aria-hidden="true" />
+            </Button>
+            <p className="truncate text-base font-medium text-brand-900">{title}</p>
+          </div>
+        )}
         <Link
           to="/"
           aria-label="Lave Streat, beranda"
-          className="rounded-md focus-visible:focus-ring"
+          className={cn(
+            'rounded-md focus-visible:focus-ring',
+            mobile === 'back' && 'hidden lg:block',
+          )}
         >
           <Logo />
         </Link>
@@ -93,6 +115,14 @@ export function PublicHeader({ mobile = 'default' }) {
           </Link>
         </div>
 
+        {mobile === 'order' && (
+          <Link
+            to="/pesan"
+            className={buttonVariants({ variant: 'secondary', className: 'lg:hidden' })}
+          >
+            Pesan Sekarang
+          </Link>
+        )}
         {mobile === 'minimal' && (
           <Link
             to="/lacak"
@@ -102,7 +132,7 @@ export function PublicHeader({ mobile = 'default' }) {
             Lacak
           </Link>
         )}
-        <div className={cn('flex items-center lg:hidden', mobile === 'minimal' && 'hidden')}>
+        <div className={cn('flex items-center lg:hidden', mobile !== 'default' && 'hidden')}>
           <Link
             to="/lacak"
             aria-label="Lacak pesanan"

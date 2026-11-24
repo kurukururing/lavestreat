@@ -96,7 +96,7 @@ export function OrderDonePage() {
             {formatDateLongWeekday(scheduled_date)} · {formatSlot(scheduled_slot)}
           </InfoRow>
         </section>
-        <Link to="/lacak" state={{ code: order.code }} className={cn(buttonVariants(), 'w-full')}>
+        <Link to={`/lacak?id=${order.code}`} className={cn(buttonVariants(), 'w-full')}>
           <Search aria-hidden="true" />
           Lacak Pesanan
         </Link>

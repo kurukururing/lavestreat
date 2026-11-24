@@ -17,7 +17,7 @@ import {
 import { UploadItem } from '@/components/ui/photo-upload';
 import { PHOTO_MAX_BYTES, PHOTO_TYPES, formatBytes, shrinkPhoto } from '@/lib/image';
 import { isFinal } from '@/lib/status';
-import { cn } from '@/lib/utils';
+import { cn, newId } from '@/lib/utils';
 
 const GROUPS = [
   { kind: 'before_customer', label: 'Dari pembeli · hanya admin', max: 3, readOnly: true },
@@ -66,7 +66,7 @@ export function PhotosCard({ order, onPhotosChange, className }) {
       toast.error(`Maksimal 5 foto per jenis. ${accepted.length - free} foto dilewati.`);
     const batch = accepted
       .slice(0, free)
-      .map((file) => ({ key: crypto.randomUUID(), kind, file, status: 'waiting', progress: 0 }));
+      .map((file) => ({ key: newId(), kind, file, status: 'waiting', progress: 0 }));
     setUploads((list) => [...list, ...batch]);
     // Berurutan agar tidak membebani server free tier.
     batch.reduce((chain, u) => chain.then(() => send(u)), Promise.resolve());

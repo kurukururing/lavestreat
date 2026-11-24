@@ -249,6 +249,7 @@ function toPublic(order) {
     code: order.code,
     status: order.status,
     status_label: STATUS_LABELS[order.status],
+    order_type: order.order_type,
     estimated_days: pending ? null : order.estimated_days,
     estimated_done_date: pending ? null : estimatedDoneDate(order),
     customer_name_masked: last ? `${first} ${last[0]}.` : first,
@@ -549,6 +550,38 @@ const publicHandlers = [
     // AC-01.9: format salah dan tidak ditemukan memakai pesan identik.
     if (!order) return error(404, 'NOT_FOUND', TRACK_NOT_FOUND);
     return HttpResponse.json(toPublic(order));
+  }),
+
+  // PUB-04: semua kondisi gagal memakai pesan 404 yang sama agar keberadaan foto tidak bocor.
+  http.get('/api/public/orders/:code/photos/:photoId', ({ params }) => {
+    const code = normalizeCode(params.code);
+    const order = code && db.orders.find((o) => o.code === code);
+    const photo = order && toPublic(order).photos.find((p) => p.id === params.photoId);
+    const blob = photo && db.blobs.get(photo.id);
+    if (!blob) return error(404, 'NOT_FOUND', TRACK_NOT_FOUND);
+    return new HttpResponse(blob, { headers: { 'Content-Type': blob.type || 'image/jpeg' } });
+  }),
+
+  http.get('/api/public/orders/:code/invoice', ({ params }) => {
+    const code = normalizeCode(params.code);
+    const order = code && db.orders.find((o) => o.code === code);
+    if (!order) return error(404, 'NOT_FOUND', TRACK_NOT_FOUND);
+    if (!toPublic(order).invoice_available)
+      return error(403, 'INVOICE_NOT_AVAILABLE', 'Nota tersedia setelah pesanan selesai.');
+    return new HttpResponse(
+      tinyPdf([
+        'LAVE STREAT - NOTA',
+        order.code,
+        ...order.items.map((l) => `${l.name} x${l.qty}  Rp${l.line_total_idr}`),
+        `TOTAL Rp${order.total_idr}`,
+      ]),
+      {
+        headers: {
+          'Content-Type': 'application/pdf',
+          'Content-Disposition': `attachment; filename="nota-${order.code}.pdf"`,
+        },
+      },
+    );
   }),
 ];
 

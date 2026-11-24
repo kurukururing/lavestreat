@@ -21,9 +21,9 @@ export function slotPassed(code, date, now = new Date()) {
   return Boolean(slot) && date === todayJakarta(now) && slot.end <= nowJakartaTime(now);
 }
 
-// Produk (FR-09, P2) belum dikerjakan; form admin hanya layanan dan add-on.
+// Form admin belum mendukung produk (FR-09); form publik sudah.
 export const ORDERABLE = CATALOG.filter((c) => c.type === 'service' || c.type === 'addon');
-const byCode = Object.fromEntries(CATALOG.map((c) => [c.code, c]));
+export const byCode = Object.fromEntries(CATALOG.map((c) => [c.code, c]));
 export const MAX_ADVANCE_DAYS = 30;
 /** Kunci sesi hasil pesanan publik, agar ID di halaman konfirmasi tidak hilang saat dimuat ulang. */
 export const LAST_ORDER_KEY = 'lavestreat:last-order';

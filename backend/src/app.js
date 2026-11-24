@@ -1,4 +1,5 @@
 import path from 'node:path';
+import compression from 'compression';
 import express from 'express';
 import helmet from 'helmet';
 import { AppError } from './lib/errors.js';
@@ -15,6 +16,8 @@ export function createApp({ distDir, trustProxyHops }) {
   app.disable('x-powered-by');
   // Bawaan helmet: CORP same-origin dan CSP 'self', cocok untuk hasil build Vite (satu origin).
   app.use(helmet());
+  // gzip untuk HTML, CSS, JS, dan JSON: bundel 298 KB menjadi ±90 KB (performa ponsel, NFR).
+  app.use(compression());
   // Batas bawaan 100 kb cukup untuk JSON. Batas 16 MB (D-02) untuk foto dipasang di parser
   // multipart rute foto saja, supaya endpoint publik tidak mengurai JSON raksasa.
   app.use(express.json());

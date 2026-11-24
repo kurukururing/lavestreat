@@ -71,13 +71,10 @@ export function PublicFooter() {
           </Column>
         </div>
         <div className="flex flex-wrap items-center justify-between gap-2 text-xs font-medium">
-          <p className="text-inverse-muted-foreground">
-            © 2026 Lave Streat · <span className="hidden lg:inline">Prototype Asah 2026, </span>data
-            dummy
-          </p>
+          <p className="text-inverse-muted-foreground">© 2026 Lave Streat · data dummy</p>
           <Link
             to="/privasi"
-            className="rounded-sm text-inverse-link outline-none hover:underline focus-visible:focus-ring"
+            className="-my-3.5 inline-flex min-h-11 items-center rounded-sm text-inverse-link outline-none hover:underline focus-visible:focus-ring"
           >
             Privasi
           </Link>

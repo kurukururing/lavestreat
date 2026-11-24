@@ -3,15 +3,7 @@ import { toast } from 'sonner';
 
 import { fetchInvoice } from '@/api/admin';
 import { errorMessage } from '@/api/client';
-
-function saveBlob(blob, filename) {
-  const url = URL.createObjectURL(blob);
-  const a = Object.assign(document.createElement('a'), { href: url, download: filename });
-  document.body.append(a);
-  a.click();
-  a.remove();
-  setTimeout(() => URL.revokeObjectURL(url), 1000);
-}
+import { saveBlob } from '@/lib/download';
 
 /**
  * Unduh nota PDF (ADM-15). Bila header `X-Invoice-Warning` ada, berkas ditahan dulu dan

@@ -39,7 +39,7 @@ function Alert({ type = 'info', title, children, className, ...props }) {
 function ColdStartNotice({ className }) {
   return (
     <Alert type="loading" className={className}>
-      Menyiapkan layanan…
+      Menyiapkan layanan… mencoba lagi otomatis.
     </Alert>
   );
 }

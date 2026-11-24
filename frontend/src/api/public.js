@@ -22,3 +22,10 @@ export function createOrder(body, files, key) {
   files.forEach((f) => form.append('files[]', f, f.name));
   return data(api.post('/public/orders', form, { headers }));
 }
+
+/** PUB-03: data lacak pesanan (DTO publik tanpa kontak dan alamat). */
+export const getPublicOrder = (code) => data(api.get(`/public/orders/${encodeURIComponent(code)}`));
+
+/** PUB-05: nota PDF, hanya tersedia saat status `done` atau `completed`. */
+export const fetchPublicInvoice = (code) =>
+  data(api.get(`/public/orders/${encodeURIComponent(code)}/invoice`, { responseType: 'blob' }));

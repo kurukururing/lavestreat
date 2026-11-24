@@ -99,7 +99,7 @@ function PageHeader({ title, subtitle, actions, nowrap = false, className }) {
         <h1 className="text-h1 lg:text-h1-lg">{title}</h1>
         {subtitle && <p className="mt-1 text-sm text-muted-foreground">{subtitle}</p>}
       </div>
-      {actions && <div className="flex shrink-0 flex-wrap items-center gap-3">{actions}</div>}
+      {actions && <div className="flex max-w-full flex-wrap items-center gap-3">{actions}</div>}
     </div>
   );
 }

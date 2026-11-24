@@ -41,6 +41,7 @@ import {
 } from '@/features/order-form/public-order';
 import { CatalogError, Money } from '@/features/public/Money';
 import { PHOTO_MAX_BYTES, PHOTO_TYPES, formatBytes, shrinkPhoto } from '@/lib/image';
+import { newId } from '@/lib/utils';
 
 const STEPS = ['Layanan', 'Metode', 'Data', 'Ringkasan'];
 const INTRO = [
@@ -159,7 +160,7 @@ export function OrderPage() {
   async function addPhotos(picked) {
     let slots = MAX_PHOTOS - photos.filter((p) => p.status !== 'failed').length;
     const added = picked.map((file) => {
-      const id = crypto.randomUUID();
+      const id = newId();
       const ext = file.name.includes('.') ? file.name.split('.').pop().toLowerCase() : '';
       if (!PHOTO_TYPES.includes(file.type)) {
         return {
@@ -239,7 +240,7 @@ export function OrderPage() {
         : photos.filter((p) => p.status === 'success').map((p) => p.file);
     try {
       // Kunci baru untuk setiap percobaan pengiriman (AC-01.6).
-      const order = await createOrder(body, ready, crypto.randomUUID());
+      const order = await createOrder(body, ready, newId());
       const summary = {
         order,
         lines: lines.map(({ code, name, qty: n, price }) => ({ code, name, qty: n, price })),

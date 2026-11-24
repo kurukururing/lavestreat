@@ -25,6 +25,13 @@ describe('penyajian SPA dan /api', () => {
     });
   });
 
+  test('aset dikompres gzip dan di-cache lama', async () => {
+    const res = await request(app).get('/assets/app.js').set('Accept-Encoding', 'gzip');
+    expect(res.status).toBe(200);
+    expect(res.headers['content-encoding']).toBe('gzip');
+    expect(res.headers['cache-control']).toContain('immutable');
+  });
+
   test('POST non-/api tidak jatuh ke fallback SPA', async () => {
     const res = await request(app).post('/lacak');
     expect(res.status).toBe(404);

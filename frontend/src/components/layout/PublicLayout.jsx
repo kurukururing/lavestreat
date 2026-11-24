@@ -1,9 +1,10 @@
-import { Suspense, useEffect } from 'react';
+import { Suspense, useEffect, useRef } from 'react';
 import { Link, Outlet, useLocation, useMatches } from 'react-router';
 
 import { PageLoader } from '@/app/PageLoader';
 import { PublicFooter } from '@/components/layout/PublicFooter';
 import { PublicHeader } from '@/components/layout/PublicHeader';
+import { useReveal } from '@/hooks/useReveal';
 import { cn } from '@/lib/utils';
 
 /** Lebar konten portal: 1200 px di tengah (Figma padding 120 di 1440), gutter 16 (ponsel) / 24 (≥ lg). */
@@ -22,6 +23,9 @@ function useScrollTop() {
 /** Kerangka portal pembeli: header, isi, footer (PG-1 sampai PG-10). */
 export function PublicLayout() {
   useScrollTop();
+  const { pathname } = useLocation();
+  const mainRef = useRef(null);
+  useReveal(mainRef);
   const handle = [...useMatches()].reverse().find((m) => m.handle)?.handle ?? {};
   useEffect(() => {
     document.title = handle.title ? `${handle.title} · LAVE STREAT` : 'LAVE STREAT';
@@ -29,18 +33,27 @@ export function PublicLayout() {
 
   return (
     // Bilah aksi lengket ponsel setinggi ±72 px menutupi footer bila tanpa ruang bawah.
-    <div className={cn('flex min-h-dvh flex-col', handle.stickyBar && 'pb-18 lg:pb-0')}>
+    // `stickyBar: 'tall'`: bilah berisi ringkasan beberapa baris (form pesanan), butuh ruang lebih.
+    <div
+      className={cn(
+        'flex min-h-dvh flex-col',
+        handle.stickyBar && (handle.stickyBar === 'tall' ? 'pb-40 lg:pb-0' : 'pb-18 lg:pb-0'),
+      )}
+    >
       <a
         href="#konten"
         className="sr-only z-50 rounded-md bg-card px-4 py-2 focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus-visible:focus-ring"
       >
         Lewati ke konten
       </a>
-      <PublicHeader />
-      <main id="konten" className="flex-1">
-        <Suspense fallback={<PageLoader />}>
-          <Outlet />
-        </Suspense>
+      <PublicHeader mobile={handle.mobileHeader} />
+      <main id="konten" ref={mainRef} className="flex-1">
+        {/* key: isi baru memudar masuk setiap pindah halaman. */}
+        <div key={pathname} className="animate-page-in">
+          <Suspense fallback={<PageLoader />}>
+            <Outlet />
+          </Suspense>
+        </div>
       </main>
       <PublicFooter />
     </div>

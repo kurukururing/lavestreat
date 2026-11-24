@@ -25,6 +25,8 @@ const ServicesPage = page(() => import('@/pages/public/ServicesPage'), 'Services
 const HowItWorksPage = page(() => import('@/pages/public/HowItWorksPage'), 'HowItWorksPage');
 const GalleryPage = page(() => import('@/pages/public/GalleryPage'), 'GalleryPage');
 const ContactPage = page(() => import('@/pages/public/ContactPage'), 'ContactPage');
+const OrderPage = page(() => import('@/pages/public/OrderPage'), 'OrderPage');
+const OrderDonePage = page(() => import('@/pages/public/OrderDonePage'), 'OrderDonePage');
 // Galeri komponen portal pembeli, hanya saat dev (tidak ikut build produksi).
 const ComponentGallery = import.meta.env.DEV
   ? page(() => import('@/pages/dev/ComponentGallery'), 'ComponentGallery')
@@ -105,7 +107,18 @@ export const router = createBrowserRouter([
       { path: 'cara-kerja', element: <HowItWorksPage />, handle: { title: 'Cara kerja' } },
       { path: 'galeri', element: <GalleryPage />, handle: { title: 'Galeri' } },
       { path: 'kontak', element: <ContactPage />, handle: { title: 'Kontak' } },
-      // Halaman PG-2 sampai PG-6 belum dibuat; sementara path lain ke halaman awal.
+      // `mobileHeader`: 'none' = halaman memasang header ponselnya sendiri, 'minimal' = logo + Lacak.
+      {
+        path: 'pesan',
+        element: <OrderPage />,
+        handle: { title: 'Pesan', stickyBar: 'tall', mobileHeader: 'none' },
+      },
+      {
+        path: 'pesan/selesai',
+        element: <OrderDonePage />,
+        handle: { title: 'Pesanan terkirim', mobileHeader: 'minimal' },
+      },
+      // Halaman PG-4 sampai PG-6 belum dibuat; sementara path lain ke halaman awal.
       { path: '*', element: <HomePlaceholder /> },
     ],
   },

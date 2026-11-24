@@ -7,8 +7,17 @@ import { cn } from '@/lib/utils';
  * Area unggah (Figma UploadArea 6:259). Hanya memilih berkas; validasi, kompres, dan unggah
  * dilakukan pemanggil lewat `onFiles` (DESIGN 6.6).
  */
-function UploadArea({ onFiles, hint, multiple = true, disabled = false, className }) {
-  const inputRef = useRef(null);
+function UploadArea({
+  onFiles,
+  hint,
+  multiple = true,
+  disabled = false,
+  inputRef: outerRef,
+  className,
+}) {
+  const localRef = useRef(null);
+  // `inputRef` dari pemanggil agar tombol "Ulang" bisa membuka pemilih berkas yang sama.
+  const inputRef = outerRef ?? localRef;
   return (
     <div
       className={cn(
@@ -47,9 +56,18 @@ function UploadArea({ onFiles, hint, multiple = true, disabled = false, classNam
 
 /**
  * Status unggah per berkas (Figma UploadItem 6:329, EC-15).
- * @param {{ name: string, status: 'waiting'|'uploading'|'success'|'failed', progress?: number, sizeLabel?: string, onRetry?: () => void }} props
+ * `errorText` mengganti "Gagal mengunggah", mis. "Tidak didukung" untuk berkas yang ditolak di klien.
+ * @param {{ name: string, status: 'waiting'|'uploading'|'success'|'failed', progress?: number, sizeLabel?: string, errorText?: string, onRetry?: () => void }} props
  */
-function UploadItem({ name, status, progress = 0, sizeLabel, onRetry, className }) {
+function UploadItem({
+  name,
+  status,
+  progress = 0,
+  sizeLabel,
+  errorText = 'Gagal mengunggah',
+  onRetry,
+  className,
+}) {
   const failed = status === 'failed';
   return (
     <div
@@ -85,7 +103,7 @@ function UploadItem({ name, status, progress = 0, sizeLabel, onRetry, className 
             Berhasil{sizeLabel ? ` · ${sizeLabel}` : ''}
           </p>
         )}
-        {failed && <p className="text-xs font-medium text-danger">Gagal mengunggah</p>}
+        {failed && <p className="text-xs font-medium text-danger">{errorText}</p>}
       </div>
       {(status === 'waiting' || status === 'uploading') && (
         <LoaderCircle

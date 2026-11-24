@@ -220,7 +220,10 @@ function WhyUs() {
           title="Dikerjakan tangan, bukan mesin"
         />
         <div className="flex flex-col gap-4 lg:flex-row">
-          <div className="hidden h-115 w-72 shrink-0 flex-col justify-between rounded-xl bg-inverse p-7 lg:flex">
+          <div
+            data-reveal
+            className="hidden h-115 w-72 shrink-0 flex-col justify-between rounded-xl bg-inverse p-7 lg:flex"
+          >
             <p className="text-sm font-medium text-inverse-muted-foreground">
               Angka kami sejauh ini
             </p>
@@ -233,7 +236,10 @@ function WhyUs() {
               </p>
             ))}
           </div>
-          <figure className="relative flex h-60 items-end overflow-hidden rounded-lg p-4 lg:h-115 lg:w-95 lg:shrink-0 lg:rounded-xl lg:p-5">
+          <figure
+            data-reveal
+            className="relative flex h-60 items-end overflow-hidden rounded-lg p-4 lg:h-115 lg:w-95 lg:shrink-0 lg:rounded-xl lg:p-5"
+          >
             <img
               src={teknisiSrc}
               alt="Teknisi workshop Lave Streat tersenyum di depan rak sepatu"
@@ -260,6 +266,7 @@ function WhyUs() {
             {FEATURES.map((f) => (
               <li
                 key={f.title}
+                data-reveal
                 className="flex flex-col gap-2.5 rounded-lg bg-background p-3.5 lg:h-55.5 lg:p-5"
               >
                 <span className="flex size-9 items-center justify-center rounded-md bg-card text-primary lg:size-11">

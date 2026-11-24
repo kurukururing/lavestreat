@@ -283,12 +283,19 @@ function upsertCustomer({ name, phone, email }) {
 
 /** Validasi bersama PUB-02 dan ADM-05. Mengembalikan galat atau data pesanan baru. */
 function prepareOrder(body) {
-  // `product_only` hanya untuk FR-09 (P2), jadi belum diterima.
-  if (body.order_type !== 'treatment') {
+  if (!['treatment', 'product_only'].includes(body.order_type)) {
     return { error: validation('order_type', 'Jenis pesanan tidak valid.') };
   }
   const priced = priceItems(body.items);
   if (priced.error) return priced;
+  // BR-02 / FR-09: `treatment` wajib ada layanan, `product_only` hanya berisi produk.
+  const hasService = priced.lines.some((l) => l.item_type === 'service');
+  if (body.order_type === 'treatment' && !hasService) {
+    return { error: validation('items', 'Pilih minimal satu layanan cuci.') };
+  }
+  if (body.order_type === 'product_only' && priced.lines.some((l) => l.item_type !== 'product')) {
+    return { error: validation('items', 'Pesanan produk saja hanya boleh berisi produk.') };
+  }
   if (!['pickup', 'dropoff'].includes(body.fulfillment)) {
     return { error: validation('fulfillment', 'Pilih jemput atau antar sendiri.') };
   }
@@ -308,6 +315,7 @@ function prepareOrder(body) {
     lines: priced.lines,
     customer: upsertCustomer({ name, phone, email: body.customer.email }),
     fields: {
+      order_type: body.order_type,
       fulfillment: body.fulfillment,
       area: body.fulfillment === 'pickup' ? body.area : null,
       scheduled_date: body.scheduled_date,

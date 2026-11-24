@@ -38,7 +38,10 @@ const photoLabel =
 
 function ResultCard({ slug, name, services }) {
   return (
-    <li className="flex flex-col gap-3 rounded-lg border border-border bg-card px-3 pt-3 pb-4 shadow-sm">
+    <li
+      data-reveal
+      className="flex flex-col gap-3 rounded-lg border border-border bg-card px-3 pt-3 pb-4 shadow-sm"
+    >
       <div className="flex gap-2">
         {[
           ['sebelum', 'Sebelum', 'bg-inverse text-inverse-foreground'],

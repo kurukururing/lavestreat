@@ -65,6 +65,7 @@ export function HowItWorksPage() {
           {STATUSES.map((s, i) => (
             <li
               key={s.status}
+              data-reveal
               className="flex flex-col items-start gap-3 rounded-lg border border-border bg-background p-4 lg:p-6"
             >
               <p className="text-xs font-medium text-muted-foreground">Langkah {i + 1}</p>

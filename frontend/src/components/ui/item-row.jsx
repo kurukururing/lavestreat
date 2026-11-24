@@ -6,7 +6,8 @@ import { cn } from '@/lib/utils';
  * Kartu pemilih item (Figma ItemRow 5:321): tile 44 px + nama + keterangan di atas, harga dan
  * stepper jumlah di bawah. Terpilih bila `qty > 0`. Harga di sini hanya tampilan; total dihitung
  * server (AC-01.5).
- * @param {{ name: string, description?: string, price: number, unit?: string, image?: string,
+ * `price` angka rupiah, atau elemen siap tampil (mis. `<Money>` dengan placeholder memuat).
+ * @param {{ name: string, description?: string, price: number|React.ReactNode, unit?: string, image?: string,
  *   icon?: React.ComponentType, qty: number, onQtyChange: (qty: number) => void, max?: number }} props
  */
 function ItemRow({
@@ -46,7 +47,7 @@ function ItemRow({
       </div>
       <div className="flex items-center justify-between gap-2">
         <p className="text-base font-medium whitespace-nowrap text-brand-700">
-          {formatRupiah(price)}
+          {typeof price === 'number' ? formatRupiah(price) : price}
           <span className="hidden sm:inline"> / {unit}</span>
         </p>
         <QtyStepper value={qty} onChange={onQtyChange} max={max} itemName={name} />

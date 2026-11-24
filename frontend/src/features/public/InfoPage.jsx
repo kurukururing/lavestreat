@@ -88,6 +88,7 @@ export function InfoSection({ id, eyebrow, title, description, className, childr
 export function IconCard({ icon: Icon, eyebrow, title, text, className, children }) {
   return (
     <li
+      data-reveal
       className={cn(
         'flex flex-col items-start gap-3 rounded-lg border border-border bg-card p-4 shadow-sm lg:p-6',
         className,

@@ -88,6 +88,12 @@ export function formatDateWeekday(value) {
   return `${p.weekday}, ${p.day} ${p.month} ${p.year}`;
 }
 
+/** Tanggal dengan hari lengkap "Senin, 1 Des 2026" (ringkasan pesanan pembeli). */
+export function formatDateLongWeekday(value) {
+  const p = parts(value, { weekday: 'long', day: 'numeric', month: 'short', year: 'numeric' });
+  return `${p.weekday}, ${p.day} ${p.month} ${p.year}`;
+}
+
 /** Tanggal pendek tanpa tahun "3 Des" (catatan kecil di kartu). */
 export function formatDayMonth(value) {
   const p = parts(value, { day: 'numeric', month: 'short' });

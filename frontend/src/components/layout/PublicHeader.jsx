@@ -24,8 +24,11 @@ const MENU_ICONS = [Sparkles, ClipboardList, Truck, BadgeCheck, Phone];
 /**
  * Header portal pembeli (Figma 89:3778 web, 86:3775 ponsel). ≥ lg: navigasi pil di tengah,
  * "Lacak" dan "Pesan Sekarang" di kanan. < lg: tombol ikon lacak dan menu layar penuh.
+ * `mobile`: 'none' menyembunyikan header di ponsel (halaman punya header sendiri, mis. form
+ * pesanan 76:2494); 'minimal' hanya logo + tombol "Lacak" (konfirmasi pesanan 78:3344).
+ * @param {{ mobile?: 'default' | 'none' | 'minimal' }} props
  */
-export function PublicHeader() {
+export function PublicHeader({ mobile = 'default' }) {
   const { pathname } = useLocation();
   const isActive = (to) => (to === '/' ? pathname === '/' : pathname.startsWith(to));
   const [open, setOpen] = useState(false);
@@ -41,7 +44,10 @@ export function PublicHeader() {
   return (
     <header
       data-scrolled={scrolled}
-      className="sticky top-0 z-40 border-b border-border bg-card transition-shadow duration-200 data-[scrolled=true]:shadow-sm"
+      className={cn(
+        'sticky top-0 z-40 border-b border-border bg-card transition-shadow duration-200 data-[scrolled=true]:shadow-sm',
+        mobile === 'none' && 'hidden lg:block',
+      )}
     >
       <div className="mx-auto flex h-16 w-full max-w-312 items-center justify-between pr-2 pl-4 lg:h-18 lg:px-6">
         <Link
@@ -87,7 +93,16 @@ export function PublicHeader() {
           </Link>
         </div>
 
-        <div className="flex items-center lg:hidden">
+        {mobile === 'minimal' && (
+          <Link
+            to="/lacak"
+            className={buttonVariants({ variant: 'secondary', size: 'sm', className: 'lg:hidden' })}
+          >
+            <Search aria-hidden="true" />
+            Lacak
+          </Link>
+        )}
+        <div className={cn('flex items-center lg:hidden', mobile === 'minimal' && 'hidden')}>
           <Link
             to="/lacak"
             aria-label="Lacak pesanan"

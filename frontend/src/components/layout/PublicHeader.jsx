@@ -41,7 +41,8 @@ export function PublicHeader({ mobile = 'default', title }) {
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 8);
-    onScroll();
+    // Tanpa pembacaan awal: membaca scrollY saat mount memaksa layout sinkron (forced reflow).
+    // Halaman mulai dari atas, dan pemulihan posisi gulir oleh browser memicu event scroll.
     window.addEventListener('scroll', onScroll, { passive: true });
     return () => window.removeEventListener('scroll', onScroll);
   }, []);

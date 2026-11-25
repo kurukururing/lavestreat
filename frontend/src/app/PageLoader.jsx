@@ -60,6 +60,10 @@ export function PageLoader({ variant = 'public', fullscreen = false, label = 'Me
       )}
     >
       <span className="sr-only">{label}</span>
+      {/* Bilah proses tipis di tepi atas layar; ikut tertunda 150 ms bersama kerangka. */}
+      <div aria-hidden="true" className="fixed inset-x-0 top-0 z-50 h-0.5 overflow-hidden">
+        <div className="h-full w-1/3 animate-loading-bar bg-brand-500" />
+      </div>
       <Shape />
     </div>
   );

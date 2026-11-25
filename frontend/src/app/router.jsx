@@ -1,12 +1,25 @@
 import { lazy, Suspense } from 'react';
-import { createBrowserRouter, Outlet } from 'react-router';
+import { createBrowserRouter, matchRoutes, Outlet } from 'react-router';
 
 import { PageLoader } from '@/app/PageLoader';
 import { PublicLayout } from '@/components/layout/PublicLayout';
+// Halaman info publik kecil (±6 KB gzip) ikut bundel awal: kunjungan pertama ke halaman ini hemat
+// satu putaran jaringan (±0,6 detik di 4G lambat). Form, lacak, dan admin tetap lazy.
+import { ContactPage } from '@/pages/public/ContactPage';
+import { GalleryPage } from '@/pages/public/GalleryPage';
 import { HomePage } from '@/pages/public/HomePage';
+import { HowItWorksPage } from '@/pages/public/HowItWorksPage';
+import { NotFoundPage } from '@/pages/public/NotFoundPage';
+import { PrivacyPage } from '@/pages/public/PrivacyPage';
+import { ServicesPage } from '@/pages/public/ServicesPage';
 
 // Halaman dimuat terpisah agar Recharts dan form besar tidak ikut bundel awal (NFR-02).
-const page = (load, name) => lazy(() => load().then((m) => ({ default: m[name] })));
+// `preload` mengunduh potongannya lebih dulu (lihat `preloadRoute`).
+const page = (load, name) =>
+  Object.assign(
+    lazy(() => load().then((m) => ({ default: m[name] }))),
+    { preload: load },
+  );
 // Kerangka admin juga dimuat terpisah: pembeli tidak perlu mengunduh sidebar dan sesi admin.
 const AuthProvider = page(() => import('@/features/auth/AuthProvider'), 'AuthProvider');
 const AdminShell = page(() => import('@/app/AdminShell'), 'AdminShell');
@@ -22,15 +35,9 @@ const CustomerDetailPage = page(
   'CustomerDetailPage',
 );
 const HelpPage = page(() => import('@/pages/admin/HelpPage'), 'HelpPage');
-const ServicesPage = page(() => import('@/pages/public/ServicesPage'), 'ServicesPage');
-const HowItWorksPage = page(() => import('@/pages/public/HowItWorksPage'), 'HowItWorksPage');
-const GalleryPage = page(() => import('@/pages/public/GalleryPage'), 'GalleryPage');
-const ContactPage = page(() => import('@/pages/public/ContactPage'), 'ContactPage');
 const OrderPage = page(() => import('@/pages/public/OrderPage'), 'OrderPage');
 const OrderDonePage = page(() => import('@/pages/public/OrderDonePage'), 'OrderDonePage');
 const TrackPage = page(() => import('@/pages/public/TrackPage'), 'TrackPage');
-const PrivacyPage = page(() => import('@/pages/public/PrivacyPage'), 'PrivacyPage');
-const NotFoundPage = page(() => import('@/pages/public/NotFoundPage'), 'NotFoundPage');
 // Galeri komponen portal pembeli, hanya saat dev (tidak ikut build produksi).
 const ComponentGallery = import.meta.env.DEV
   ? page(() => import('@/pages/dev/ComponentGallery'), 'ComponentGallery')
@@ -40,12 +47,35 @@ const AdminNotFoundPage = page(
   'AdminNotFoundPage',
 );
 
+/**
+ * Unduh semua potongan lazy untuk sebuah path sekaligus (kerangka admin, sesi, dan halaman),
+ * bukan berantai satu per satu saat React merender lapis demi lapis.
+ * @param {string} pathname
+ */
+export function preloadRoute(pathname) {
+  for (const m of matchRoutes(router.routes, pathname) ?? []) {
+    // Elemen bisa dibungkus Suspense (rute akar): cari komponen lazy di anak pertamanya juga.
+    const el = m.route.element;
+    for (const type of [el?.type, el?.props?.children?.type]) type?.preload?.().catch(() => {});
+  }
+}
+
+/**
+ * Prefetch saat ada niat membuka tautan (hover, sentuh, fokus papan ketik): unduhan tidak
+ * berebut bandwidth dengan pemuatan awal, dan halaman sudah siap saat diklik.
+ */
+function preloadOnIntent(event) {
+  const link = event.target.closest?.('a[href]');
+  if (!link || link.origin !== location.origin || navigator.connection?.saveData) return;
+  preloadRoute(link.pathname);
+}
+
 /** Rute PRD Bagian 8 (AD-1 sampai AD-8). `handle.title` mengisi judul tab. */
 export const router = createBrowserRouter([
   {
     // Sesi admin (ADM-03) hanya diperiksa di rute admin, bukan setiap kunjungan pembeli.
     element: (
-      <Suspense fallback={<PageLoader fullscreen />}>
+      <Suspense fallback={<PageLoader variant="admin" fullscreen />}>
         <AuthProvider>
           <Outlet />
         </AuthProvider>
@@ -138,3 +168,11 @@ export const router = createBrowserRouter([
     ],
   },
 ]);
+
+// Muat awal: potongan untuk URL sekarang diunduh paralel saat modul ini dievaluasi.
+if (import.meta.env.MODE !== 'test') {
+  preloadRoute(location.pathname);
+  for (const type of ['pointerover', 'touchstart', 'focusin']) {
+    document.addEventListener(type, preloadOnIntent, { passive: true });
+  }
+}

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { startTransition, useCallback, useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
 
 import * as adminApi from '@/api/admin';
@@ -12,8 +12,9 @@ export function AuthProvider({ children }) {
   useEffect(() => {
     let active = true;
     adminApi.getMe().then(
-      (user) => active && setState({ status: 'authed', user }),
-      () => active && setState({ status: 'guest', user: null }),
+      // Transition: kerangka admin dirender bertahap, bukan satu tugas panjang (TBT).
+      (user) => active && startTransition(() => setState({ status: 'authed', user })),
+      () => active && startTransition(() => setState({ status: 'guest', user: null })),
     );
     function onExpired() {
       setState((s) => {

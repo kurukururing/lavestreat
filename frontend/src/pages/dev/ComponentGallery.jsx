@@ -12,8 +12,8 @@ import { ServiceAccordion, ServiceAccordionItem } from '@/components/ui/service-
 import { StatusTimeline } from '@/components/ui/status-timeline';
 import { StickyActionBar } from '@/components/ui/sticky-action-bar';
 import { SummaryDivider, SummaryList, SummaryRow } from '@/components/ui/summary-list';
-import beforeSrc from '@/assets/galeri/diadora-sebelum.jpg';
-import afterSrc from '@/assets/galeri/diadora-sesudah.jpg';
+import beforeSrc from '@/assets/galeri/diadora-sebelum.webp';
+import afterSrc from '@/assets/galeri/diadora-sesudah.webp';
 import { formatRupiah } from '@/lib/format';
 
 // Data contoh untuk melihat komponen; bukan data pesanan.

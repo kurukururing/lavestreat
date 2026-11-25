@@ -8,16 +8,34 @@
       name="description"
       content="Jasa cuci dan perawatan sepatu dengan antar-jemput di Sidoarjo dan Surabaya. Pesan online dan lacak status pesanan Anda."
     />
-    <!-- Gambar hero beranda (LCP) diunduh bersamaan dengan JS, tidak menunggu React render. -->
-    <link
-      rel="preload"
-      as="image"
-      href="/src/assets/beranda/hero-sepatu.jpg"
-      fetchpriority="high"
-    />
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <!-- App shell: tampil begitu HTML + CSS tiba, sebelum JS (FCP di ponsel). React menggantinya
+           pada render pertama. Kelas disalin dari PublicHeader dan Logo agar tidak berkedip. -->
+      <div class="min-h-dvh bg-background" aria-hidden="true">
+        <div class="border-b border-border bg-card">
+          <div class="mx-auto flex h-16 w-full max-w-312 items-center pl-4 lg:h-18 lg:px-6">
+            <span class="inline-flex items-center gap-2.5">
+              <span
+                class="flex size-9 shrink-0 items-center justify-center rounded-md border border-border bg-card"
+              >
+                <img src="/src/assets/logo-lave.png" alt="" class="size-7.5 object-contain" />
+              </span>
+              <span
+                class="font-heading text-lg leading-6 font-bold tracking-[-0.01em] whitespace-nowrap text-brand-900"
+                >Lave Streat</span
+              >
+            </span>
+          </div>
+        </div>
+        <div class="mx-auto flex w-full max-w-312 flex-col gap-3 px-4 py-8 lg:px-6 lg:py-12">
+          <div class="h-3 w-32 animate-pulse rounded-md bg-brand-200/60"></div>
+          <div class="h-9 w-3/4 max-w-md animate-pulse rounded-md bg-brand-200/60"></div>
+          <div class="h-4 w-full max-w-xl animate-pulse rounded-md bg-brand-200/60"></div>
+        </div>
+      </div>
+    </div>
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>

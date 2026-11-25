@@ -34,7 +34,9 @@ export function AdminShell() {
     document.title = handle.title ? `${handle.title} · LAVE STREAT` : 'LAVE STREAT';
   }, [handle.title]);
 
-  if (status === 'loading') return <PageLoader fullscreen />;
+  // Selama sesi diperiksa, kerangka dan halaman sudah dirender agar permintaan data halaman berjalan
+  // paralel dengan ADM-03 (hemat satu putaran jaringan). Aman: tanpa sesi server membalas 401 untuk
+  // semua data admin, lalu status menjadi `guest` dan pengguna diarahkan ke login.
   if (status === 'guest') {
     return (
       <Navigate to="/admin/login" replace state={{ from: location.pathname + location.search }} />
@@ -57,14 +59,14 @@ export function AdminShell() {
       <AdminLayout
         activePath={location.pathname}
         pendingCount={pendingCount}
-        user={{ name: user.username }}
+        user={{ name: user?.username ?? '' }}
         onLogout={handleLogout}
         onSearch={search}
         onOpenSearch={() => setSearchOpen(true)}
         LinkComponent={Link}
         mobileBack={mobileBack}
       >
-        <Suspense fallback={<PageLoader />}>
+        <Suspense fallback={<PageLoader variant="admin" />}>
           <Outlet />
         </Suspense>
       </AdminLayout>

@@ -1,11 +1,12 @@
 import { Clock, Droplets, Plus, Sparkles } from 'lucide-react';
 import { Link } from 'react-router';
 
-import deepCleanSrc from '@/assets/beranda/deep-clean.jpg';
-import suedeCleanSrc from '@/assets/beranda/suede-clean.jpg';
-import whiteCleanSrc from '@/assets/beranda/white-clean.jpg';
+import deepCleanSrc from '@/assets/beranda/deep-clean.webp';
+import suedeCleanSrc from '@/assets/beranda/suede-clean.webp';
+import whiteCleanSrc from '@/assets/beranda/white-clean.webp';
 import { Container } from '@/components/layout/PublicLayout';
 import { buttonVariants } from '@/components/ui/button';
+import { LazyImage } from '@/components/ui/lazy-image';
 import { SectionHeading } from '@/components/ui/section-heading';
 import { CatalogError, Money } from '@/features/public/Money';
 import { useCatalog } from '@/hooks/useCatalog';
@@ -59,7 +60,7 @@ function PhotoServiceCard({ code, name, src }) {
       data-reveal
       className="flex flex-col overflow-hidden rounded-lg border border-border bg-card hover:-translate-y-0.5 hover:shadow-md"
     >
-      <img src={src} alt="" loading="lazy" className="h-27.5 w-full object-cover lg:h-37.5" />
+      <LazyImage src={src} alt="" className="h-27.5 w-full object-cover lg:h-37.5" />
       <div className="flex flex-1 flex-col gap-0.5 p-3 lg:gap-1.5 lg:px-4.5 lg:py-4">
         <h3 className="font-sans text-sm font-medium text-brand-900 lg:font-heading lg:text-h3">
           {name}
@@ -133,8 +134,11 @@ function PriceList({ title, rows, className }) {
   );
 }
 
-/** Bagian "Layanan & tarif" (Figma 84:3942), dipakai di Beranda (PG-1) dan Layanan (PG-7). */
-export function ServiceCatalog() {
+/**
+ * Bagian "Layanan & tarif" (Figma 84:3942), dipakai di Beranda (PG-1) dan Layanan (PG-7).
+ * `priority`: katalog ada di atas lipatan (Layanan), foto utama jadi LCP dan dimuat langsung.
+ */
+export function ServiceCatalog({ priority = false }) {
   const { price } = useCatalog();
   return (
     <section aria-labelledby="layanan-judul" className="py-9 lg:py-22">
@@ -156,10 +160,10 @@ export function ServiceCatalog() {
             data-reveal
             className="relative col-span-2 flex h-55 flex-col items-start justify-end gap-1.5 overflow-hidden rounded-lg p-4 lg:h-80 lg:p-6"
           >
-            <img
+            <LazyImage
               src={deepCleanSrc}
               alt=""
-              loading="lazy"
+              {...(priority && { loading: 'eager', fetchPriority: 'high' })}
               className="absolute inset-0 size-full object-cover"
             />
             <span className="absolute inset-0 photo-scrim" aria-hidden="true" />

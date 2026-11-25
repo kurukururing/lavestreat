@@ -13,15 +13,24 @@ export default defineConfig(({ mode }) => {
       proxy: { '/api': env.VITE_DEV_API_TARGET || 'http://localhost:3000' },
     },
     // Tanpa ini rolldown memecah modul bersama (tiap ikon lucide, util kecil) menjadi ±30 berkas
-    // yang harus diunduh sebelum render pertama. Modul yang dipakai ≥ 2 potongan digabung ke
-    // `vendor` dan `shared`; modul milik satu halaman saja (mis. Recharts di dasbor) tetap lazy.
+    // yang harus diunduh sebelum render pertama. `react`, `icons`, dan `core` (layout, util, UI
+    // dasar) dimuat di awal; modul milik satu halaman saja (mis. Recharts di dasbor) tetap lazy.
     build: {
       rolldownOptions: {
         output: {
           codeSplitting: {
             groups: [
-              { name: 'vendor', test: /node_modules/, minShareCount: 2 },
-              { name: 'shared', test: /[\\/]src[\\/]/, minShareCount: 2 },
+              {
+                name: 'react',
+                test: /node_modules[\\/](react|react-dom|scheduler|react-router)[\\/]/,
+                priority: 2,
+              },
+              { name: 'icons', test: /node_modules[\\/]lucide-react[\\/]/, priority: 2 },
+              {
+                name: 'core',
+                test: /src[\\/](lib|components[\\/]layout)[\\/]|src[\\/]app[\\/]PageLoader|src[\\/]components[\\/]ui[\\/](button|alert|skeleton|logo|lazy-image|section-heading|sticky-action-bar|input)\.jsx|node_modules[\\/](clsx|tailwind-merge|class-variance-authority)[\\/]/,
+                priority: 1,
+              },
             ],
           },
         },

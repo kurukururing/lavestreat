@@ -64,7 +64,7 @@ export function ServicesPage() {
           },
         ]}
       />
-      <ServiceCatalog />
+      <ServiceCatalog priority />
       <InfoSection
         id="panduan-judul"
         eyebrow="Panduan"

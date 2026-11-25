@@ -1,13 +1,14 @@
 import { useState } from 'react';
 
+import { LazyImage } from '@/components/ui/lazy-image';
 import { BeforeAfterShowcase } from '@/features/public/BeforeAfterShowcase';
 import { InfoSection, PageHero } from '@/features/public/InfoPage';
 import { OrderCta } from '@/features/public/OrderCta';
 import { cn } from '@/lib/utils';
 
-// Foto statis milik tim, bukan foto pesanan (PG-9). Nama file: <slug>-sebelum.jpg / -sesudah.jpg.
-const photos = import.meta.glob('../../assets/galeri/*.jpg', { eager: true, import: 'default' });
-const photo = (slug, side) => photos[`../../assets/galeri/${slug}-${side}.jpg`];
+// Foto statis milik tim, bukan foto pesanan (PG-9). Nama file: <slug>-sebelum.webp / -sesudah.webp.
+const photos = import.meta.glob('../../assets/galeri/*.webp', { eager: true, import: 'default' });
+const photo = (slug, side) => photos[`../../assets/galeri/${slug}-${side}.webp`];
 
 // Urutan dan tag dari Figma Hi-fi (130:6284).
 const RESULTS = [
@@ -48,10 +49,10 @@ function ResultCard({ slug, name, services }) {
           ['sesudah', 'Sesudah', 'bg-primary text-primary-foreground'],
         ].map(([side, label, tone]) => (
           <div key={side} className="relative h-50 min-w-0 flex-1 overflow-hidden rounded-md">
-            <img
+            <LazyImage
               src={photo(slug, side)}
               alt={`${name} ${side} dicuci`}
-              loading="lazy"
+
               className="size-full object-cover"
             />
             <span className={cn(photoLabel, tone)} aria-hidden="true">
@@ -98,7 +99,7 @@ export function GalleryPage() {
           { value: 'Foto asli', label: 'dari workshop kami', tone: 'primary' },
         ]}
       />
-      <BeforeAfterShowcase />
+      <BeforeAfterShowcase priority />
       <InfoSection
         id="galeri-judul"
         eyebrow="Galeri hasil"

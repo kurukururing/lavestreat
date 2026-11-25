@@ -35,7 +35,7 @@ export function InvoicePage() {
       </Card>
     );
   }
-  if (loading || !order) return <PageLoader />;
+  if (loading || !order) return <PageLoader variant="admin" />;
   return <Invoice order={order} />;
 }
 

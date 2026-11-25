@@ -259,8 +259,9 @@
   background-image: linear-gradient(to bottom, rgb(7 43 74 / 0) 35%, rgb(7 43 74 / 0.88));
 }
 
-/* Muncul saat digulir (useReveal). Hanya disembunyikan bila hook aktif, jadi tanpa JS konten tetap tampil. */
-html[data-reveal-ready] [data-reveal]:not([data-revealed]) {
+/* Muncul saat digulir (useReveal). Hanya elemen yang dilaporkan di luar layar yang disembunyikan,
+   jadi tanpa JS atau sebelum observer melapor konten tetap tampil. */
+[data-reveal][data-reveal-hidden] {
   opacity: 0;
   transform: translateY(12px);
 }
@@ -299,6 +300,14 @@ html[data-reveal-ready] [data-reveal]:not([data-revealed]) {
 }
 @utility animate-page-in {
   animation: page-in 200ms cubic-bezier(0.2, 0, 0, 1);
+}
+/* Skeleton baru tampil setelah 150 ms: potongan halaman dari cache tidak sempat berkedip. */
+@utility animate-loader-in {
+  animation: page-in 200ms 150ms cubic-bezier(0.2, 0, 0, 1) both;
+}
+/* Gambar lazy memudar masuk setelah selesai diunduh (LazyImage). */
+@utility animate-img-in {
+  animation: page-in 300ms cubic-bezier(0.2, 0, 0, 1);
 }
 
 @media (prefers-reduced-motion: reduce) {

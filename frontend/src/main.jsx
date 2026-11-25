@@ -1,4 +1,4 @@
-import { StrictMode } from 'react';
+import { startTransition, StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import './index.css';
 import App from './App.jsx';
@@ -10,10 +10,15 @@ async function enableMocks() {
   await worker.start();
 }
 
+// Render awal di dalam transition: React memecahnya menjadi potongan kecil (time slicing) sehingga
+// halaman tetap responsif di ponsel lambat (TBT). App shell di index.html tampil sampai selesai.
 enableMocks().then(() => {
-  createRoot(document.getElementById('root')).render(
-    <StrictMode>
-      <App />
-    </StrictMode>,
+  const root = createRoot(document.getElementById('root'));
+  startTransition(() =>
+    root.render(
+      <StrictMode>
+        <App />
+      </StrictMode>,
+    ),
   );
 });

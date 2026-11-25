@@ -13,8 +13,8 @@ export default defineConfig(({ mode }) => {
       proxy: { '/api': env.VITE_DEV_API_TARGET || 'http://localhost:3000' },
     },
     // Tanpa ini rolldown memecah modul bersama (tiap ikon lucide, util kecil) menjadi ±30 berkas
-    // yang harus diunduh sebelum render pertama. `react`, `icons`, dan `core` (layout, util, UI
-    // dasar) dimuat di awal; modul milik satu halaman saja (mis. Recharts di dasbor) tetap lazy.
+    // yang harus diunduh sebelum render pertama. `react`, `icons`, dan `core` (layout publik, util,
+    // UI dasar) dimuat di awal; modul milik satu halaman saja (mis. Recharts di dasbor) tetap lazy.
     build: {
       rolldownOptions: {
         output: {
@@ -28,7 +28,8 @@ export default defineConfig(({ mode }) => {
               { name: 'icons', test: /node_modules[\\/]lucide-react[\\/]/, priority: 2 },
               {
                 name: 'core',
-                test: /src[\\/](lib|components[\\/]layout)[\\/]|src[\\/]app[\\/]PageLoader|src[\\/]components[\\/]ui[\\/](button|alert|skeleton|logo|lazy-image|section-heading|sticky-action-bar|input)\.jsx|node_modules[\\/](clsx|tailwind-merge|class-variance-authority)[\\/]/,
+                // Hanya layout publik: layout admin ikut potongan AdminShell (lazy).
+                test: /src[\\/]lib[\\/]|src[\\/]components[\\/]layout[\\/]Public|src[\\/]app[\\/]PageLoader|src[\\/]components[\\/]ui[\\/](button|alert|skeleton|logo|lazy-image|section-heading|sticky-action-bar|input)\.jsx|node_modules[\\/](clsx|tailwind-merge|class-variance-authority)[\\/]/,
                 priority: 1,
               },
             ],

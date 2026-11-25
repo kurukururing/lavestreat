@@ -5,7 +5,7 @@ function Skeleton({ className, ...props }) {
     <div
       data-slot="skeleton"
       aria-hidden="true"
-      className={cn('animate-pulse rounded-md bg-brand-200/60', className)}
+      className={cn('animate-shimmer rounded-md bg-brand-200/60', className)}
       {...props}
     />
   );

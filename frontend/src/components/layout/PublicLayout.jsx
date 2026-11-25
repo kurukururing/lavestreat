@@ -1,4 +1,4 @@
-import { Suspense, useEffect, useRef } from 'react';
+import { Suspense, useEffect, useRef, useState } from 'react';
 import { Link, Outlet, useLocation, useMatches } from 'react-router';
 
 import { PageLoader } from '@/app/PageLoader';
@@ -26,6 +26,9 @@ export function PublicLayout() {
   const { pathname } = useLocation();
   const mainRef = useRef(null);
   useReveal(mainRef);
+  // Pemuatan pertama tidak memudar: animasi dari opacity 0 menunda LCP. Hanya pindah halaman.
+  const [firstPath] = useState(pathname);
+  const fadeIn = pathname !== firstPath;
   const handle = [...useMatches()].reverse().find((m) => m.handle)?.handle ?? {};
   useEffect(() => {
     document.title = handle.title ? `${handle.title} · LAVE STREAT` : 'LAVE STREAT';
@@ -49,7 +52,7 @@ export function PublicLayout() {
       <PublicHeader mobile={handle.mobileHeader} title={handle.title} />
       <main id="konten" ref={mainRef} className="flex-1">
         {/* key: isi baru memudar masuk setiap pindah halaman. */}
-        <div key={pathname} className="animate-page-in">
+        <div key={pathname} className={cn(fadeIn && 'animate-page-in')}>
           <Suspense fallback={<PageLoader />}>
             <Outlet />
           </Suspense>

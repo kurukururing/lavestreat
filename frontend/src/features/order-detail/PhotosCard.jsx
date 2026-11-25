@@ -14,6 +14,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import { LazyImage } from '@/components/ui/lazy-image';
 import { UploadItem } from '@/components/ui/photo-upload';
 import { PHOTO_MAX_BYTES, PHOTO_TYPES, formatBytes, shrinkPhoto } from '@/lib/image';
 import { isFinal } from '@/lib/status';
@@ -121,10 +122,10 @@ export function PhotosCard({ order, onPhotosChange, className }) {
                       rel="noreferrer"
                       className="block rounded-md outline-none focus-visible:focus-ring"
                     >
-                      <img
+                      <LazyImage
                         src={photoUrl(order.id, photo.id)}
                         alt={`${group.label} ${i + 1}`}
-                        loading="lazy"
+
                         className="h-28 w-32 rounded-md bg-muted object-cover"
                       />
                     </a>

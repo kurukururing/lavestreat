@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { startTransition, useCallback, useEffect, useState } from 'react';
 
 /**
  * Muat data dari API dengan status proses/berhasil/gagal (NFR-06).
@@ -16,9 +16,10 @@ export function useApi(fetcher, deps) {
 
   useEffect(() => {
     let active = true;
+    // Render hasil data sebagai transition agar tidak menjadi satu tugas panjang (TBT).
     fetcher().then(
-      (data) => active && setState({ key, data, error: null }),
-      (error) => active && setState((s) => ({ key, data: s.data, error })),
+      (data) => active && startTransition(() => setState({ key, data, error: null })),
+      (error) => active && startTransition(() => setState((s) => ({ key, data: s.data, error }))),
     );
     return () => {
       active = false;

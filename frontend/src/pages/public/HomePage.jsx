@@ -12,11 +12,12 @@ import {
 } from 'lucide-react';
 import { Link, useNavigate } from 'react-router';
 
-import heroSrc from '@/assets/beranda/hero-sepatu.jpg';
-import teknisiSrc from '@/assets/beranda/teknisi.jpg';
+import heroSrc from '@/assets/beranda/hero-sepatu.webp';
+import teknisiSrc from '@/assets/beranda/teknisi.webp';
 import { Container } from '@/components/layout/PublicLayout';
 import { Button, buttonVariants } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { LazyImage } from '@/components/ui/lazy-image';
 import { SectionHeading } from '@/components/ui/section-heading';
 import { StickyActionBar } from '@/components/ui/sticky-action-bar';
 import { BeforeAfterShowcase } from '@/features/public/BeforeAfterShowcase';
@@ -240,10 +241,9 @@ function WhyUs() {
             data-reveal
             className="relative flex h-60 items-end overflow-hidden rounded-lg p-4 lg:h-115 lg:w-95 lg:shrink-0 lg:rounded-xl lg:p-5"
           >
-            <img
+            <LazyImage
               src={teknisiSrc}
               alt="Teknisi workshop Lave Streat tersenyum di depan rak sepatu"
-              loading="lazy"
               className="absolute inset-0 size-full object-cover"
             />
             <span className="absolute inset-0 photo-scrim" aria-hidden="true" />

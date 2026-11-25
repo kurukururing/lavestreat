@@ -1,14 +1,4 @@
-import { useMemo, useState } from 'react';
-import {
-  Bar,
-  BarChart,
-  Cell,
-  LabelList,
-  Pie,
-  PieChart,
-  ResponsiveContainer,
-  XAxis,
-} from 'recharts';
+import { lazy, Suspense, useMemo, useRef, useState } from 'react';
 import { BarChart3, Footprints, ShoppingBag, Wallet } from 'lucide-react';
 import { CATALOG } from '@lavestreat/shared';
 
@@ -29,6 +19,7 @@ import {
 import { Skeleton } from '@/components/ui/skeleton';
 import { ChartCard, KpiCard, StatusSummaryCard } from '@/features/dashboard/DashboardCards';
 import { useApi } from '@/hooks/useApi';
+import { useNearScreen } from '@/hooks/useNearScreen';
 import {
   addDays,
   formatDateRange,
@@ -38,6 +29,26 @@ import {
   todayJakarta,
 } from '@/lib/format';
 import { cn } from '@/lib/utils';
+
+// Recharts dimuat terpisah: kartu KPI (LCP) tidak menunggu pustaka grafik.
+const BusiestBars = lazy(() =>
+  import('@/features/dashboard/DashboardCharts').then((m) => ({ default: m.BusiestBars })),
+);
+const FulfillmentDonut = lazy(() =>
+  import('@/features/dashboard/DashboardCharts').then((m) => ({ default: m.FulfillmentDonut })),
+);
+const chartFallback = <Skeleton className="size-full rounded-md" />;
+
+/** Grafik baru dimuat saat mendekati layar: di ponsel letaknya di bawah kartu KPI. */
+function LazyChart({ children }) {
+  const ref = useRef(null);
+  const near = useNearScreen(ref);
+  return (
+    <div ref={ref} className="size-full">
+      {near ? <Suspense fallback={chartFallback}>{children}</Suspense> : chartFallback}
+    </div>
+  );
+}
 
 const PERIODS = [
   { value: '7d', label: '7 hari' },
@@ -280,41 +291,9 @@ function BusiestCard({ busiest, view, onViewChange }) {
       note={note}
     >
       <div className="h-56" role="img" aria-label={note}>
-        <ResponsiveContainer width="100%" height="100%">
-          <BarChart data={rows} margin={{ top: 24, right: 0, bottom: 0, left: 0 }}>
-            <XAxis
-              dataKey="label"
-              axisLine={false}
-              tickLine={false}
-              interval={view === 'hour' ? 'preserveStartEnd' : 0}
-              tick={{ fill: 'var(--color-muted-foreground)', fontSize: 12 }}
-            />
-            <Bar dataKey="orders" radius={[6, 6, 0, 0]} isAnimationActive={false}>
-              {rows.map((r) => (
-                <Cell
-                  key={r.key}
-                  fill={r.orders === max && max > 0 ? 'var(--color-primary)' : 'var(--color-muted)'}
-                />
-              ))}
-              <LabelList
-                dataKey="orders"
-                position="top"
-                content={({ x, y, width, value }) =>
-                  value === max && max > 0 ? (
-                    <text
-                      x={x + width / 2}
-                      y={y - 6}
-                      textAnchor="middle"
-                      className="fill-brand-700 text-xs font-semibold"
-                    >
-                      {value}
-                    </text>
-                  ) : null
-                }
-              />
-            </Bar>
-          </BarChart>
-        </ResponsiveContainer>
+        <LazyChart>
+          <BusiestBars rows={rows} max={max} hourly={view === 'hour'} />
+        </LazyChart>
       </div>
     </ChartCard>
   );
@@ -331,24 +310,9 @@ function FulfillmentCard({ share, total }) {
     <ChartCard title="Jemput kurir vs antar sendiri" subtitle="Proporsi pesanan pada periode ini">
       <div className="flex flex-col items-center gap-4 sm:flex-row xl:flex-col">
         <div className="relative size-44 shrink-0" role="img" aria-label={summary}>
-          <ResponsiveContainer width="100%" height="100%">
-            <PieChart>
-              <Pie
-                data={slices}
-                dataKey="value"
-                innerRadius="68%"
-                outerRadius="100%"
-                startAngle={90}
-                endAngle={-270}
-                stroke="none"
-                isAnimationActive={false}
-              >
-                {slices.map((s) => (
-                  <Cell key={s.key} fill={s.color} />
-                ))}
-              </Pie>
-            </PieChart>
-          </ResponsiveContainer>
+          <LazyChart>
+            <FulfillmentDonut slices={slices} />
+          </LazyChart>
           <div className="absolute inset-0 flex flex-col items-center justify-center">
             <span className="text-h2 font-semibold">{formatPercent(share.pickup)}</span>
             <span className="text-xs text-muted-foreground">dijemput</span>

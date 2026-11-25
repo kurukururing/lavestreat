@@ -48,14 +48,13 @@ describe('useReveal', () => {
   afterEach(() => {
     window.IntersectionObserver = originalIO;
     window.matchMedia = originalMM;
-    delete document.documentElement.dataset.revealReady;
   });
 
   test('tanpa IntersectionObserver semua langsung tampil', () => {
     delete window.IntersectionObserver;
     render(<Harness />);
     expect(screen.getByText('Satu')).toHaveAttribute('data-revealed');
-    expect(document.documentElement).not.toHaveAttribute('data-reveal-ready');
+    expect(screen.getByText('Satu')).not.toHaveAttribute('data-reveal-hidden');
   });
 
   test('reduce motion langsung tampil tanpa menunggu perpotongan', () => {
@@ -66,34 +65,43 @@ describe('useReveal', () => {
     expect(io.observe).not.toHaveBeenCalled();
   });
 
-  test('menandai elemen saat berpotongan lalu berhenti mengamati', () => {
+  test('di luar layar disembunyikan, lalu tampil saat berpotongan dan berhenti diamati', () => {
     const io = installIO();
     render(<Harness />);
     const p = screen.getByText('Satu');
-    expect(p).not.toHaveAttribute('data-revealed');
-    expect(document.documentElement).toHaveAttribute('data-reveal-ready');
+    // Sebelum observer melapor, elemen tetap tampil (tidak ada kedipan).
+    expect(p).not.toHaveAttribute('data-reveal-hidden');
     expect(io.observe).toHaveBeenCalledWith(p);
+
+    io.callback([{ isIntersecting: false, target: p }]);
+    expect(p).toHaveAttribute('data-reveal-hidden');
+    expect(p).not.toHaveAttribute('data-revealed');
 
     io.callback([{ isIntersecting: true, target: p }]);
     expect(p).toHaveAttribute('data-revealed');
+    expect(p).not.toHaveAttribute('data-reveal-hidden');
     expect(io.unobserve).toHaveBeenCalledWith(p);
   });
 
-  test('elemen yang sudah di layar saat mulai langsung tampil tanpa berkedip', () => {
-    installIO();
-    const spy = vi
-      .spyOn(HTMLElement.prototype, 'getBoundingClientRect')
-      .mockReturnValue({ top: 100, bottom: 200, left: 0, right: 100, width: 100, height: 100 });
+  test('elemen yang sudah di layar saat mulai tidak pernah disembunyikan', () => {
+    const io = installIO();
+    const spy = vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect');
     render(<Harness />);
+    const p = screen.getByText('Satu');
+    io.callback([{ isIntersecting: true, target: p }]);
+    expect(p).toHaveAttribute('data-revealed');
+    expect(p).not.toHaveAttribute('data-reveal-hidden');
+    // Posisi dari observer, bukan baca layout sinkron (memaksa layout saat render).
+    expect(spy).not.toHaveBeenCalled();
     spy.mockRestore();
-    expect(screen.getByText('Satu')).toHaveAttribute('data-revealed');
   });
 
   test('fokus keyboard ke dalam elemen tersembunyi langsung menampilkannya', () => {
-    installIO();
+    const io = installIO();
     render(<TestWithButton />);
     const button = screen.getByRole('button', { name: 'Pesan' });
-    expect(button.closest('[data-reveal]')).not.toHaveAttribute('data-revealed');
+    io.callback([{ isIntersecting: false, target: button.closest('[data-reveal]') }]);
+    expect(button.closest('[data-reveal]')).toHaveAttribute('data-reveal-hidden');
     button.focus();
     expect(button.closest('[data-reveal]')).toHaveAttribute('data-revealed');
   });

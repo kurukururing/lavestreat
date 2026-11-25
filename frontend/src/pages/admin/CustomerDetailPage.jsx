@@ -41,7 +41,7 @@ export function CustomerDetailPage() {
       </Card>
     );
   }
-  if (loading || !data) return <PageLoader />;
+  if (loading || !data) return <PageLoader variant="admin" />;
 
   const orders = [...data.orders].sort((a, b) => b.created_at.localeCompare(a.created_at));
 

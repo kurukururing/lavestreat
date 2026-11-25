@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { ChevronLeft, ChevronRight, ImageOff } from 'lucide-react';
 
+import { LazyImage } from '@/components/ui/lazy-image';
 import { cn } from '@/lib/utils';
 
 const label =
@@ -10,10 +11,12 @@ const label =
  * Pembanding geser sebelum–sesudah (Figma 149:7470 web, 149:7666 ponsel). Foto sesudah ditumpuk
  * di atas dan dipotong dari kiri sesuai posisi gagang. Kontrolnya `input range` asli agar bisa
  * digeser dengan papan ketik (panah kiri/kanan) dan dibacakan pembaca layar.
- * @param {{ before: { src: string, alt: string }, after: { src: string, alt: string } }} props
+ * `priority`: pembanding ada di atas lipatan (jadi LCP), foto dimuat langsung tanpa menunggu.
+ * @param {{ before: { src: string, alt: string }, after: { src: string, alt: string }, priority?: boolean }} props
  */
-function BeforeAfterSlider({ before, after, className }) {
+function BeforeAfterSlider({ before, after, priority = false, className }) {
   const [pos, setPos] = useState(50);
+  const eager = priority ? { loading: 'eager', fetchPriority: 'high' } : {};
   return (
     <div
       className={cn(
@@ -21,10 +24,16 @@ function BeforeAfterSlider({ before, after, className }) {
         className,
       )}
     >
-      <img src={before.src} alt={before.alt} className="absolute inset-0 size-full object-cover" />
-      <img
+      <LazyImage
+        src={before.src}
+        alt={before.alt}
+        {...eager}
+        className="absolute inset-0 size-full object-cover"
+      />
+      <LazyImage
         src={after.src}
         alt={after.alt}
+        {...eager}
         className="absolute inset-0 size-full object-cover"
         style={{ clipPath: `inset(0 0 0 ${pos}%)` }}
       />
@@ -71,7 +80,7 @@ function PhotoTile({ photo, kind }) {
   }
   return (
     <figure className="relative h-45 overflow-hidden rounded-md">
-      <img src={photo.src} alt={photo.alt} loading="lazy" className="size-full object-cover" />
+      <LazyImage src={photo.src} alt={photo.alt} className="size-full object-cover" />
       <figcaption
         className={cn(
           'absolute top-2 left-2 rounded-full px-2 py-1 text-xs font-medium tracking-[0.06em] uppercase',

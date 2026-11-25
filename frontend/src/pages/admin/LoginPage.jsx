@@ -3,7 +3,7 @@ import { Navigate, useLocation, useNavigate } from 'react-router';
 import { CircleCheck, Lock, User } from 'lucide-react';
 
 import { errorCode, errorMessage } from '@/api/client';
-import heroUrl from '@/assets/login-hero.jpg';
+import heroUrl from '@/assets/login-hero.webp';
 import { PageLoader } from '@/app/PageLoader';
 import { Alert } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
@@ -31,7 +31,7 @@ export function LoginPage() {
     document.title = 'Masuk · LAVE STREAT';
   }, []);
 
-  if (status === 'loading') return <PageLoader fullscreen />;
+  if (status === 'loading') return <PageLoader variant="blank" fullscreen />;
   if (status === 'authed' && !submitting) return <Navigate to="/admin" replace />;
 
   async function handleSubmit(e) {

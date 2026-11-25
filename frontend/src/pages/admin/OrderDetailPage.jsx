@@ -69,7 +69,7 @@ export function OrderDetailPage() {
   }
   // Saat memuat ulang (mis. setelah konflik) detail dilepas, jadi state lokal (estimasi, catatan)
   // dibuat ulang dari data terbaru.
-  if (loading || !order) return <PageLoader />;
+  if (loading || !order) return <PageLoader variant="admin" />;
   return <OrderDetail key={order.id} order={order} setOrder={setData} reload={reload} />;
 }
 

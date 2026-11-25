@@ -1,3 +1,4 @@
+import { LazyImage } from '@/components/ui/lazy-image';
 import { QtyStepper } from '@/components/ui/qty-stepper';
 import { formatRupiah } from '@/lib/format';
 import { cn } from '@/lib/utils';
@@ -35,7 +36,7 @@ function ItemRow({
       <div className="flex items-start gap-3">
         <span className="flex size-11 shrink-0 items-center justify-center overflow-hidden rounded-md bg-accent text-accent-foreground">
           {image ? (
-            <img src={image} alt="" loading="lazy" className="size-full object-cover" />
+            <LazyImage src={image} alt="" className="size-full object-cover" />
           ) : (
             Icon && <Icon className="size-5" aria-hidden="true" />
           )}

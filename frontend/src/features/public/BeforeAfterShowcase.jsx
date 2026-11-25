@@ -1,13 +1,14 @@
 import { useState } from 'react';
 
-import diadoraBefore from '@/assets/galeri/diadora-sebelum.jpg';
-import diadoraAfter from '@/assets/galeri/diadora-sesudah.jpg';
-import koiBefore from '@/assets/galeri/koi-sebelum.jpg';
-import koiAfter from '@/assets/galeri/koi-sesudah.jpg';
-import warriorBefore from '@/assets/galeri/warrior-sebelum.jpg';
-import warriorAfter from '@/assets/galeri/warrior-sesudah.jpg';
+import diadoraBefore from '@/assets/galeri/diadora-sebelum.webp';
+import diadoraAfter from '@/assets/galeri/diadora-sesudah.webp';
+import koiBefore from '@/assets/galeri/koi-sebelum.webp';
+import koiAfter from '@/assets/galeri/koi-sesudah.webp';
+import warriorBefore from '@/assets/galeri/warrior-sebelum.webp';
+import warriorAfter from '@/assets/galeri/warrior-sesudah.webp';
 import { Container } from '@/components/layout/PublicLayout';
 import { BeforeAfterSlider } from '@/components/ui/before-after';
+import { LazyImage } from '@/components/ui/lazy-image';
 import { cn } from '@/lib/utils';
 
 // Foto statis milik tim dari workshop, bukan foto pesanan (PG-9).
@@ -26,7 +27,7 @@ const SHOES = [
  * Bagian "Bukti pengerjaan" (Figma 149:7470 web, 149:7666 ponsel): pembanding geser dan pilihan
  * sepatu. Web: daftar pilihan di kiri. Ponsel: pembanding di atas, tiga gambar kecil di bawah.
  */
-export function BeforeAfterShowcase({ className }) {
+export function BeforeAfterShowcase({ priority = false, className }) {
   const [index, setIndex] = useState(0);
   const shoe = SHOES[index];
 
@@ -43,10 +44,10 @@ export function BeforeAfterShowcase({ className }) {
             selected ? 'border-primary bg-card' : 'border-transparent hover:bg-card/60',
           )}
         >
-          <img
+          <LazyImage
             src={s.before}
             alt=""
-            loading="lazy"
+
             className="h-16 w-full rounded-md object-cover lg:size-14 lg:shrink-0"
           />
           <span className="flex min-w-0 flex-col font-medium">
@@ -82,6 +83,7 @@ export function BeforeAfterShowcase({ className }) {
         </div>
         <BeforeAfterSlider
           key={shoe.name}
+          priority={priority}
           className="h-65 aspect-auto rounded-lg lg:h-115 lg:min-w-0 lg:flex-1 lg:rounded-xl"
           before={{ src: shoe.before, alt: `${shoe.name} sebelum dicuci` }}
           after={{ src: shoe.after, alt: `${shoe.name} sesudah dicuci (${shoe.services})` }}

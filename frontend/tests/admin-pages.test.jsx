@@ -24,6 +24,10 @@ beforeAll(() => {
   Element.prototype.scrollIntoView ??= () => {};
 });
 
+// Render pertama memuat halaman lazy dan merender bertahap (startTransition); saat semua berkas tes
+// berjalan paralel ini bisa melewati batas bawaan 1 detik Testing Library.
+const FIRST_RENDER = { timeout: 3000 };
+
 async function openAt(path, { authed = true } = {}) {
   if (authed) await login({ username: 'owner', password: 'dummy-owner' });
   await act(() => router.navigate(path));
@@ -32,16 +36,16 @@ async function openAt(path, { authed = true } = {}) {
 
 async function openOrder(code) {
   await openAt('/admin/pesanan');
-  const [link] = await screen.findAllByRole('link', { name: code });
+  const [link] = await screen.findAllByRole('link', { name: code }, FIRST_RENDER);
   fireEvent.click(link);
-  return screen.findByRole('heading', { level: 1, name: new RegExp(code) });
+  return screen.findByRole('heading', { level: 1, name: new RegExp(code) }, FIRST_RENDER);
 }
 
 describe('Login pemilik (AC-02.1)', () => {
   test('tanpa sesi diarahkan ke login, kredensial salah ditolak', async () => {
     await openAt('/admin/pesanan', { authed: false });
     expect(
-      await screen.findByRole('heading', { name: 'Masuk ke panel pemilik' }),
+      await screen.findByRole('heading', { name: 'Masuk ke panel pemilik' }, FIRST_RENDER),
     ).toBeInTheDocument();
 
     fireEvent.change(screen.getByLabelText('Username'), { target: { value: 'owner' } });
